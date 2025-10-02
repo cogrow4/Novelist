@@ -1,40 +1,50 @@
-# Novelist
+# Novelist 📚
 
-A modern, professional WYSIWYG writing application for novelists and creative writers. Built with a beautiful Notion-inspired dark theme and macOS Pages-like interface.
+**A beautiful, simple writing app designed for everyone** - even if you find it hard to log into your email!
 
-## Features
+Novelist is a distraction-free writing application with VSCode Kimbie Dark theming, folder-based projects, and an interactive tutorial. Everything auto-saves, so you can focus on your story.
 
-### Beautiful, Modern Interface
-- **Notion-inspired dark theme** with professional color palette
-- **WYSIWYG editor** - what you see is what you get (no separate preview needed)
-- **Clean, distraction-free** writing environment
-- **Popout sidebar** for planning, project management, and characters
+## ✨ Why Novelist?
 
-### Rich Text Editing
-- **Font selection** - choose from any system font
-- **Font size control** - adjust size from 8pt to 72pt
-- **Text formatting** - Bold, Italic, Underline
-- **Text alignment** - Left, Center, Right
-- **Real-time spell check** with suggestions
-- **Find & Replace** functionality
-- **Undo/Redo** support
+- ✅ **SO EASY TO USE** - Interactive tutorial walks you through everything
+- ✅ **AUTO-SAVES** - You'll never lose your work (saves every 2 seconds!)
+- ✅ **FOLDER-BASED** - Each chapter is a separate file in Documents/Novelist/
+- ✅ **BEAUTIFUL** - VSCode Kimbie Dark theme that's easy on the eyes
+- ✅ **ORGANIZED** - Sidebar shows all chapters, characters, and planning notes
+- ✅ **EXPORT READY** - Combine all chapters into one file when you're done
 
-### Project Management
-- **Chapter & Scene organization** - structure your novel
-- **Character profiles** - detailed character management with roles, ages, descriptions, and notes
-- **Planning tools** - Outlines, plot development, and general notes
-- **Auto-save** - never lose your work
+## 🎨 Features
 
-### Professional Features
-- **Git integration** - version control for your writing
-- **Settings panel** - customize fonts, themes, and preferences
-- **Keyboard shortcuts** - efficient workflow
-- **File management** - open, save, and manage multiple documents
+### 📖 Project Management
+- **Create projects** with one click - stored in `~/Documents/Novelist/`
+- **Each chapter is a separate file** - easy to manage and backup
+- **Add scenes** within chapters for better organization
+- **Full chapter visualization** in sidebar - see your entire book structure
+- **Export to single markdown file** when finished
 
-### Themes
-- **Dark mode** (default) - Notion-inspired dark theme
-- **Light mode** - Clean, professional light theme
-- Seamless theme switching
+### ✍️ Writing Experience
+- **Simple, beautiful editor** - just start typing
+- **Adjustable font size** - 10pt to 24pt
+- **Auto-save** - saves 2 seconds after you stop typing
+- **Word count** - track your progress in real-time
+- **Distraction-free** - toggle sidebar with Cmd+B
+
+### 👥 Character Management
+- **Character profiles** - keep track of everyone in your story
+- **Organized in sidebar** - quick access to all characters
+- **Markdown-based** - easy to edit and customize
+
+### 📝 Planning Tools
+- **Plot outlines** - plan your story structure
+- **Story arcs** - track character development
+- **World building** - document your universe
+- **Ideas & research** - capture inspiration
+- **All organized by category** in the sidebar
+
+### 🎓 Tutorial & Help
+- **Interactive tutorial** on first run - shows you everything
+- **Quick tips** - context-sensitive help when you need it
+- **Help menu** - access tutorial anytime
 
 ## Installation
 
@@ -60,125 +70,138 @@ A modern, professional WYSIWYG writing application for novelists and creative wr
    /opt/homebrew/bin/pip3.9 install -r requirements.txt
    ```
 
-## Usage
+## 🚀 Usage
 
-### Running the App
+### Starting the App
 
 ```bash
 /opt/homebrew/bin/python3.9 -m app.main
 ```
 
+### First Time? Here's What Happens:
+
+1. **Tutorial appears** - walks you through everything (takes 2 minutes)
+2. **Create your first project** - just give it a name
+3. **Start writing!** - that's it!
+
+### Daily Workflow
+
+1. **Open the app**
+2. **Click "Open Project"** - pick your book
+3. **Click a chapter in the sidebar** - starts editing
+4. **Write!** - your work auto-saves
+
+### Creating Your Book Structure
+
+**To add a chapter:**
+1. Click **"+ Chapter"** in the sidebar
+2. Give it a name (like "Chapter 1: The Beginning")
+3. Start writing!
+
+**To add a scene:**
+1. Select a chapter in the sidebar
+2. Click **"+ Scene"**
+3. Give it a name (like "The Hero Wakes Up")
+
+**To add a character:**
+1. Click the **"👥 Characters"** tab
+2. Click **"+ Character"**
+3. Enter their name and details
+
+### When You're Done Writing
+
+1. Go to **File > Export Book**
+2. Choose where to save it
+3. You'll get ONE big file with all chapters combined!
+4. Share it, publish it, or format it however you want!
+
 ### Keyboard Shortcuts
 
-- **Cmd+N** - New file
-- **Cmd+O** - Open file
-- **Cmd+S** - Save file
-- **Cmd+Shift+S** - Save as
-- **Cmd+F** - Find/Replace
-- **Cmd+B** - Toggle sidebar
+- **Cmd+N** - New project
+- **Cmd+O** - Open project
+- **Cmd+S** - Save (but it auto-saves anyway!)
+- **Cmd+E** - Export book
+- **Cmd+B** - Hide/show sidebar
 - **Cmd+Z** - Undo
-- **Cmd+Shift+Z** - Redo
-- **Cmd+X/C/V** - Cut/Copy/Paste
 - **Cmd+Q** - Quit
 
-### Using the Sidebar
+### The Sidebar
 
-Press **Cmd+B** or go to **View > Toggle Sidebar** to open the popout sidebar with:
+The sidebar on the left shows your entire book:
 
-1. **Planning Tab**
-   - Create outlines, character notes, plot development
-   - Organize your ideas and research
-   - Double-click to open in editor
+- **📖 Chapters Tab** - All your chapters and scenes
+- **👥 Characters Tab** - All your character profiles
+- **📝 Planning Tab** - Plot outlines, ideas, research
 
-2. **Project Tab**
-   - Manage chapters and scenes
-   - Structure your novel
-   - Quick navigation between sections
+Click the **⧉** button to pop it out into its own window!
 
-3. **Characters Tab**
-   - Create character profiles
-   - Track character details (name, role, age)
-   - Add descriptions and notes
-   - Double-click to edit character
+## 📁 Where Are My Files?
 
-### Formatting Your Text
+Your projects are stored in **`~/Documents/Novelist/`**
 
-Use the toolbar at the top of the editor to:
-- **Select font** - Choose from any installed system font
-- **Adjust size** - Pick font size (8-72pt)
-- **Format text** - Bold (B), Italic (I), Underline (U)
-- **Align text** - Left, Center, Right alignment
-
-### Settings
-
-Access **File > Settings** to customize:
-- **Theme** - Dark or Light mode
-- **Default font** - Set your preferred font
-- **Default font size** - Set your preferred size
-- **Spell check** - Enable/disable spell checking
-- **Auto-save** - Enable/disable auto-save (every 2 minutes)
-
-### Git Integration
-
-Manage version control through the **Git menu**:
-- **Init Repository** - Initialize git in your project folder
-- **Status** - Check repository status
-- **Commit** - Commit your changes
-- **Set Remote** - Configure remote repository
-- **Push/Pull** - Sync with remote
-
-## Project Structure
-
+Each project has its own folder:
 ```
-Novelist/
-├── app/
-│   ├── main.py              # Main application
-│   ├── rich_editor.py       # WYSIWYG rich text editor
-│   ├── themes.py            # Notion-inspired theming
-│   ├── settings.py          # Settings dialog
-│   ├── characters.py        # Character management
-│   ├── planning.py          # Planning & notes
-│   ├── project.py           # Chapter/scene management
-│   ├── storage.py           # Data persistence
-│   ├── git_integration.py   # Git operations
-│   └── onboarding.py        # First-run experience
-├── requirements.txt         # Python dependencies
-└── README.md               # This file
+~/Documents/Novelist/
+└── My Novel/
+    ├── chapters/
+    │   ├── 01_welcome.md
+    │   ├── 02_chapter_two.md
+    │   └── 03_chapter_three.md
+    ├── characters/
+    │   ├── protagonist.md
+    │   └── antagonist.md
+    ├── planning/
+    │   ├── plot/
+    │   ├── arcs/
+    │   └── world/
+    └── project.json
 ```
 
-## Data Storage
+**Each chapter is a separate markdown file** - you can:
+- Open them in any text editor
+- Backup to cloud storage
+- Version control with git
+- Share individual chapters
 
-All data is automatically saved to `~/.novelist/`:
-- **settings.json** - Application settings and preferences
-- **notes.json** - Planning notes, outlines, and ideas
-- **project.json** - Project structure, chapters, scenes, and characters
+## 🎯 Design Philosophy
 
-## Design Philosophy
+Novelist is designed to be **SIMPLE**:
 
-Novelist is designed to be:
-- **Distraction-free** - Clean interface that gets out of your way
-- **Professional** - Polished UI inspired by Notion and macOS Pages
-- **Powerful** - All the features you need without complexity
-- **Beautiful** - Carefully crafted dark theme with perfect contrast
-- **Efficient** - Keyboard shortcuts and smart workflows
+1. **No complicated menus** - everything is in the sidebar
+2. **No confusing buttons** - labels tell you exactly what they do
+3. **Auto-saves always** - you don't need to think about saving
+4. **Folder-based** - your files are just files, not locked in a database
+5. **Tutorial included** - we teach you everything
 
-## Contributing
+**If you can click a button and type, you can use Novelist!**
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest features
-- Submit pull requests
+## 🆘 Getting Help
 
-## License
+- **Tutorial** - Click Help > Show Tutorial
+- **Quick Tips** - Click Help > Quick Tip for random helpful hints
+- **Stuck?** - Click the **❓ Help** button in the toolbar
 
-MIT License - feel free to use and modify for your own projects.
+## 🤝 Contributing
 
-## Acknowledgments
+Found a bug or have a suggestion? We'd love to hear from you!
+- Open an issue on Codeberg
+- Submit a pull request
+- Email us your feedback
 
-- inspired by Notion's beautiful dark theme
-- Interface design influenced by macOS Pages
-- Built with Python and Tkinter
+## 📄 License
+
+MIT License - free to use and modify!
+
+## 🙏 Credits
+
+- **Theme**: Inspired by VSCode's Kimbie Dark
+- **Design**: Made for simplicity and beauty
+- **Built with**: Python & Tkinter
 
 ---
 
-**Happy Writing! 📝**
+## 💝 Made with Love
+
+Novelist was built to make writing accessible to everyone. We believe that everyone has a story to tell, and technology should help, not hinder.
+
+**Now go write that novel! 📚✨**

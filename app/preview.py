@@ -1,22 +1,26 @@
 import tkinter as tk
 from tkinter import ttk
 import markdown as md
-
-try:
-    from tkinterweb import HtmlFrame  # type: ignore
-    HAS_WEB = True
-except Exception:
-    HAS_WEB = False
+import os
 
 
 class PreviewFrame(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self._theme_provider = None
-        if HAS_WEB:
-            self.web = HtmlFrame(self, messages_enabled=False)
-            self.web.pack(fill="both", expand=True)
-        else:
+        self.has_web = False
+        self.web = None
+        # Allow users to disable webview to avoid crashes on older macOS
+        disable = os.environ.get("NOVELIST_DISABLE_WEBVIEW", "0") == "1"
+        if not disable:
+            try:
+                from tkinterweb import HtmlFrame  # type: ignore
+                self.web = HtmlFrame(self, messages_enabled=False)
+                self.web.pack(fill="both", expand=True)
+                self.has_web = True
+            except Exception:
+                self.has_web = False
+        if not self.has_web:
             self.text = tk.Text(self, wrap="word", state="disabled")
             self.text.pack(fill="both", expand=True)
 
@@ -28,12 +32,12 @@ class PreviewFrame(ttk.Frame):
         html_body = md.markdown(content, extensions=["fenced_code", "tables", "toc"]) or ""
         css = self._theme_provider.webview_css() if self._theme_provider else ""
         full = f"<html><head><meta charset='utf-8'><style>{css}</style></head><body>{html_body}</body></html>"
-        if HAS_WEB:
+        if self.has_web and self.web is not None:
             try:
                 self.web.load_html(full)
                 return
             except Exception:
-                pass
+                self.has_web = False
         # Fallback to plain text rendering
         plain = self._html_to_plain(html_body)
         if hasattr(self, "text"):

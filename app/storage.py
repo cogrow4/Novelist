@@ -151,3 +151,47 @@ class Storage:
             if sc.get("title") == sc_title:
                 return sc
         return None
+    
+    # Character API
+    def list_characters(self):
+        """Get list of all characters"""
+        return self._project.get("characters", [])
+    
+    def add_character(self, name: str):
+        """Add a new character"""
+        characters = self._project.setdefault("characters", [])
+        characters.append({
+            "name": name,
+            "role": "Supporting",
+            "age": "",
+            "description": "",
+            "notes": ""
+        })
+        self._save()
+    
+    def get_character(self, name: str):
+        """Get character by name"""
+        for char in self._project.get("characters", []):
+            if char.get("name") == name:
+                return char
+        return None
+    
+    def update_character(self, name: str, data: dict):
+        """Update character data"""
+        char = self.get_character(name)
+        if char:
+            char.update(data)
+            self._save()
+    
+    def rename_character(self, old_name: str, new_name: str):
+        """Rename a character"""
+        char = self.get_character(old_name)
+        if char:
+            char["name"] = new_name
+            self._save()
+    
+    def delete_character(self, name: str):
+        """Delete a character"""
+        characters = self._project.get("characters", [])
+        self._project["characters"] = [c for c in characters if c.get("name") != name]
+        self._save()

@@ -208,6 +208,27 @@ const saveScene = async (projectPath, chapterId, sceneId, payload) => {
   return scenePath;
 };
 
+// Deletions
+const deleteChapter = async (projectPath, chapterId) => {
+  if (!chapterId) throw new Error('chapterId is required');
+  const chapterPath = join(projectPath, 'chapters', `${chapterId}.md`);
+  const scenesDir = join(projectPath, 'chapters', `${chapterId}-scenes`);
+  // Remove chapter file
+  await fs.remove(chapterPath);
+  // Remove associated scenes directory if present
+  await fs.remove(scenesDir);
+  await writeProjectFile(projectPath, await loadProjectFile(projectPath));
+  return true;
+};
+
+const deleteScene = async (projectPath, chapterId, sceneId) => {
+  if (!chapterId) throw new Error('chapterId is required');
+  if (!sceneId) throw new Error('sceneId is required');
+  const scenePath = join(projectPath, 'chapters', `${chapterId}-scenes`, `${sceneId}.md`);
+  await fs.remove(scenePath);
+  return true;
+};
+
 const listCharacters = async (projectPath) => {
   const charactersDir = join(projectPath, 'characters');
   await fs.ensureDir(charactersDir);
@@ -244,6 +265,13 @@ const saveCharacter = async (projectPath, characterId, payload) => {
   }
   await fs.writeFile(filePath, content, 'utf-8');
   return { id, path: filePath };
+};
+
+const deleteCharacter = async (projectPath, characterId) => {
+  if (!characterId) throw new Error('characterId is required');
+  const filePath = join(projectPath, 'characters', `${characterId}.md`);
+  await fs.remove(filePath);
+  return true;
 };
 
 const listNotes = async (projectPath) => {
@@ -285,6 +313,13 @@ const saveNote = async (projectPath, noteId, payload) => {
   content += '\n';
   await fs.writeFile(filePath, content, 'utf-8');
   return { id, path: filePath, category };
+};
+
+const deleteNote = async (projectPath, noteId) => {
+  if (!noteId) throw new Error('noteId is required');
+  const filePath = join(projectPath, 'notes', `${noteId}.md`);
+  await fs.remove(filePath);
+  return true;
 };
 
 const parseNoteCategory = (content) => {
@@ -358,11 +393,15 @@ export {
   createChapter,
   createScene,
   saveScene,
+  deleteChapter,
+  deleteScene,
   listChapters,
   listCharacters,
   saveCharacter,
+  deleteCharacter,
   listNotes,
   saveNote,
+  deleteNote,
   exportProject,
   initGitRepo,
   commitCurrentChanges,

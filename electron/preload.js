@@ -14,15 +14,19 @@ contextBridge.exposeInMainWorld('novelist', {
     create: (projectPath, name) => invoke('chapters:create', projectPath, name),
     save: (projectPath, chapterId, payload) => invoke('chapters:save', projectPath, chapterId, payload),
     createScene: (projectPath, chapterId, sceneName) => invoke('chapters:create-scene', projectPath, chapterId, sceneName),
-    saveScene: (projectPath, chapterId, sceneId, payload) => invoke('chapters:save-scene', projectPath, chapterId, sceneId, payload)
+    saveScene: (projectPath, chapterId, sceneId, payload) => invoke('chapters:save-scene', projectPath, chapterId, sceneId, payload),
+    delete: (projectPath, chapterId) => invoke('chapters:delete', projectPath, chapterId),
+    deleteScene: (projectPath, chapterId, sceneId) => invoke('chapters:delete-scene', projectPath, chapterId, sceneId)
   },
   characters: {
     list: (projectPath) => invoke('characters:list', projectPath),
-    save: (projectPath, characterId, payload) => invoke('characters:save', projectPath, characterId, payload)
+    save: (projectPath, characterId, payload) => invoke('characters:save', projectPath, characterId, payload),
+    delete: (projectPath, characterId) => invoke('characters:delete', projectPath, characterId)
   },
   notes: {
     list: (projectPath) => invoke('notes:list', projectPath),
-    save: (projectPath, noteId, payload) => invoke('notes:save', projectPath, noteId, payload)
+    save: (projectPath, noteId, payload) => invoke('notes:save', projectPath, noteId, payload),
+    delete: (projectPath, noteId) => invoke('notes:delete', projectPath, noteId)
   },
   exports: {
     project: (projectPath) => invoke('project:export', projectPath)

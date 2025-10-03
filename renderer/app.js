@@ -711,10 +711,42 @@ function renderChapters() {
     item.className = 'sidebar-item';
     item.dataset.entryType = 'chapter';
     item.dataset.entryId = chapter.id;
-    item.innerHTML = `
-      <strong>${chapter.title}</strong>
-      <span class="meta">${chapter.scenes?.length || 0} scenes</span>
-    `;
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'row';
+    const strong = document.createElement('strong');
+    strong.textContent = chapter.title;
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    meta.textContent = `${chapter.scenes?.length || 0} scenes`;
+    const del = document.createElement('button');
+    del.className = 'ghost icon-bin';
+    del.title = 'Delete chapter';
+    del.textContent = '🗑️';
+    del.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const ok = window.confirm(`Delete chapter "${chapter.title}" and its scenes?`);
+      if (!ok) return;
+      try {
+        await window.novelist.chapters.delete(state.project.path, chapter.id);
+        state.project.chapters = await window.novelist.chapters.list(state.project.path);
+        renderChapters();
+        updateTotalWordCount();
+        // If current entry was in this chapter, reset selection
+        if (state.currentEntry && (state.currentEntry.id === chapter.id || state.currentEntry.chapterId === chapter.id)) {
+          state.currentEntry = null;
+          setTitleInput('');
+          setEditorContent('');
+          if (state.project.chapters[0]) await selectEntry('chapter', state.project.chapters[0].id);
+        }
+      } catch (err) {
+        console.error('Delete chapter failed', err);
+        showToast(`Could not delete chapter: ${err.message}`, { type: 'error' });
+      }
+    });
+    titleWrap.appendChild(strong);
+    titleWrap.appendChild(meta);
+    titleWrap.appendChild(del);
+    item.appendChild(titleWrap);
     item.addEventListener('click', () => selectEntry('chapter', chapter.id));
 
     const scenesContainer = document.createElement('div');
@@ -726,7 +758,33 @@ function renderChapters() {
       sceneEl.dataset.entryType = 'scene';
       sceneEl.dataset.entryId = scene.id;
       sceneEl.dataset.chapterId = chapter.id;
-      sceneEl.textContent = scene.title;
+      const label = document.createElement('span');
+      label.textContent = scene.title;
+      const delScene = document.createElement('button');
+      delScene.className = 'ghost icon-bin';
+      delScene.title = 'Delete scene';
+      delScene.textContent = '🗑️';
+      delScene.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        const ok = window.confirm(`Delete scene "${scene.title}"?`);
+        if (!ok) return;
+        try {
+          await window.novelist.chapters.deleteScene(state.project.path, chapter.id, scene.id);
+          state.project.chapters = await window.novelist.chapters.list(state.project.path);
+          renderChapters();
+          if (state.currentEntry && state.currentEntry.type === 'scene' && state.currentEntry.id === scene.id) {
+            state.currentEntry = null;
+            setTitleInput('');
+            setEditorContent('');
+            await selectEntry('chapter', chapter.id);
+          }
+        } catch (err) {
+          console.error('Delete scene failed', err);
+          showToast(`Could not delete scene: ${err.message}`, { type: 'error' });
+        }
+      });
+      sceneEl.appendChild(label);
+      sceneEl.appendChild(delScene);
       sceneEl.addEventListener('click', (event) => {
         event.stopPropagation();
         selectEntry('scene', scene.id, { chapterId: chapter.id });
@@ -769,10 +827,36 @@ function renderCharacters() {
     item.className = 'sidebar-item';
     item.dataset.entryType = 'character';
     item.dataset.entryId = character.id;
-    item.innerHTML = `
-      <strong>${character.name}</strong>
-      <span class="meta">Profile</span>
-    `;
+    const strong = document.createElement('strong');
+    strong.textContent = character.name;
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    meta.textContent = 'Profile';
+    const del = document.createElement('button');
+    del.className = 'ghost icon-bin';
+    del.title = 'Delete character';
+    del.textContent = '🗑️';
+    del.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const ok = window.confirm(`Delete character "${character.name}"?`);
+      if (!ok) return;
+      try {
+        await window.novelist.characters.delete(state.project.path, character.id);
+        state.project.characters = await window.novelist.characters.list(state.project.path);
+        renderCharacters();
+        if (state.currentEntry && state.currentEntry.type === 'character' && state.currentEntry.id === character.id) {
+          state.currentEntry = null;
+          setTitleInput('');
+          setEditorContent('');
+        }
+      } catch (err) {
+        console.error('Delete character failed', err);
+        showToast(`Could not delete character: ${err.message}`, { type: 'error' });
+      }
+    });
+    item.appendChild(strong);
+    item.appendChild(meta);
+    item.appendChild(del);
     item.addEventListener('click', () => selectEntry('character', character.id));
     container.appendChild(item);
   });
@@ -814,10 +898,36 @@ function renderNotes() {
       item.className = 'sidebar-item';
       item.dataset.entryType = 'note';
       item.dataset.entryId = note.id;
-      item.innerHTML = `
-        <strong>${note.title}</strong>
-        <span class="meta">${category}</span>
-      `;
+      const strong = document.createElement('strong');
+      strong.textContent = note.title;
+      const meta = document.createElement('span');
+      meta.className = 'meta';
+      meta.textContent = category;
+      const del = document.createElement('button');
+      del.className = 'ghost icon-bin';
+      del.title = 'Delete note';
+      del.textContent = '🗑️';
+      del.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const ok = window.confirm(`Delete note "${note.title}"?`);
+        if (!ok) return;
+        try {
+          await window.novelist.notes.delete(state.project.path, note.id);
+          state.project.notes = await window.novelist.notes.list(state.project.path);
+          renderNotes();
+          if (state.currentEntry && state.currentEntry.type === 'note' && state.currentEntry.id === note.id) {
+            state.currentEntry = null;
+            setTitleInput('');
+            setEditorContent('');
+          }
+        } catch (err) {
+          console.error('Delete note failed', err);
+          showToast(`Could not delete note: ${err.message}`, { type: 'error' });
+        }
+      });
+      item.appendChild(strong);
+      item.appendChild(meta);
+      item.appendChild(del);
       item.addEventListener('click', () => selectEntry('note', note.id));
       group.appendChild(item);
     });

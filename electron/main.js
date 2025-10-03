@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { checkAndCreateProject, listProjects, loadProject, saveChapter, createChapter, createScene, saveScene, listChapters, listCharacters, saveCharacter, listNotes, saveNote, exportProject, initGitRepo, commitCurrentChanges, ensureProjectStructure, pushToRemote, pullFromRemote } from './project-manager.js';
+import { checkAndCreateProject, listProjects, loadProject, saveChapter, createChapter, createScene, saveScene, listChapters, listCharacters, saveCharacter, listNotes, saveNote, exportProject, initGitRepo, commitCurrentChanges, ensureProjectStructure, pushToRemote, pullFromRemote, deleteChapter, deleteScene, deleteCharacter, deleteNote } from './project-manager.js';
 import Store from 'electron-store';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -210,6 +210,16 @@ ipcMain.handle('chapters:save-scene', async (_event, projectPath, chapterId, sce
   return saveScene(projectPath, chapterId, sceneId, content);
 });
 
+ipcMain.handle('chapters:delete', async (_event, projectPath, chapterId) => {
+  await ensureProjectStructure(projectPath);
+  return deleteChapter(projectPath, chapterId);
+});
+
+ipcMain.handle('chapters:delete-scene', async (_event, projectPath, chapterId, sceneId) => {
+  await ensureProjectStructure(projectPath);
+  return deleteScene(projectPath, chapterId, sceneId);
+});
+
 
 ipcMain.handle('characters:list', async (_event, projectPath) => {
   await ensureProjectStructure(projectPath);
@@ -221,6 +231,11 @@ ipcMain.handle('characters:save', async (_event, projectPath, characterId, conte
   return saveCharacter(projectPath, characterId, content);
 });
 
+ipcMain.handle('characters:delete', async (_event, projectPath, characterId) => {
+  await ensureProjectStructure(projectPath);
+  return deleteCharacter(projectPath, characterId);
+});
+
 
 ipcMain.handle('notes:list', async (_event, projectPath) => {
   await ensureProjectStructure(projectPath);
@@ -230,6 +245,11 @@ ipcMain.handle('notes:list', async (_event, projectPath) => {
 ipcMain.handle('notes:save', async (_event, projectPath, noteId, content) => {
   await ensureProjectStructure(projectPath);
   return saveNote(projectPath, noteId, content);
+});
+
+ipcMain.handle('notes:delete', async (_event, projectPath, noteId) => {
+  await ensureProjectStructure(projectPath);
+  return deleteNote(projectPath, noteId);
 });
 
 

@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { checkAndCreateProject, listProjects, loadProject, saveChapter, createChapter, createScene, saveScene, listChapters, listCharacters, saveCharacter, listNotes, saveNote, exportProject, initGitRepo, commitCurrentChanges, ensureProjectStructure, pushToRemote, pullFromRemote, deleteChapter, deleteScene, deleteCharacter, deleteNote } from './project-manager.js';
+import { checkAndCreateProject, listProjects, loadProject, saveChapter, createChapter, createScene, saveScene, listChapters, listCharacters, saveCharacter, listNotes, saveNote, exportProject, initGitRepo, commitCurrentChanges, ensureProjectStructure, pushToRemote, pullFromRemote, deleteChapter, deleteScene, deleteCharacter, deleteNote, setGitRemote } from './project-manager.js';
 import Store from 'electron-store';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -83,7 +83,18 @@ const createMenu = () => {
         { role: 'cut' },
         { role: 'copy' },
         { role: 'paste' },
-        { role: 'selectAll' }
+        { role: 'selectAll' },
+        { type: 'separator' },
+        {
+          label: 'Find…',
+          accelerator: 'CmdOrCtrl+F',
+          click: () => mainWindow.webContents.send('menu:find')
+        },
+        {
+          label: 'Replace…',
+          accelerator: 'CmdOrCtrl+Alt+F',
+          click: () => mainWindow.webContents.send('menu:replace')
+        }
       ]
     },
     {
@@ -117,6 +128,10 @@ const createMenu = () => {
         {
           label: 'Initialize Repository',
           click: () => mainWindow.webContents.send('menu:git-init')
+        },
+        {
+          label: 'Set Remote…',
+          click: () => mainWindow.webContents.send('menu:git-set-remote')
         },
         { type: 'separator' },
         {
@@ -284,6 +299,10 @@ ipcMain.handle('git:push', async (_event, projectPath) => {
 
 ipcMain.handle('git:pull', async (_event, projectPath) => {
   return pullFromRemote(projectPath);
+});
+
+ipcMain.handle('git:set-remote', async (_event, projectPath, remoteUrl) => {
+  return setGitRemote(projectPath, remoteUrl);
 });
 
 ipcMain.handle('preferences:get', () => {

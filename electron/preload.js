@@ -35,7 +35,8 @@ contextBridge.exposeInMainWorld('novelist', {
     init: (projectPath) => invoke('git:init', projectPath),
     commit: (projectPath, message) => invoke('git:commit', projectPath, message),
     push: (projectPath) => invoke('git:push', projectPath),
-    pull: (projectPath) => invoke('git:pull', projectPath)
+    pull: (projectPath) => invoke('git:pull', projectPath),
+    setRemote: (projectPath, remoteUrl) => invoke('git:set-remote', projectPath, remoteUrl)
   },
   preferences: {
     get: () => invoke('preferences:get'),
@@ -51,12 +52,15 @@ contextBridge.exposeInMainWorld('appMenu', {
       'menu:new-project',
       'menu:open-project',
       'menu:open-recent',
+      'menu:find',
+      'menu:replace',
       'menu:export',
       'menu:toggle-sidebar',
       'menu:git-commit',
       'menu:git-init',
       'menu:git-push',
       'menu:git-pull',
+      'menu:git-set-remote',
       'menu:git-sign-in',
       'menu:show-tips'
     ]);

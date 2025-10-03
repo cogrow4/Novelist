@@ -383,6 +383,21 @@ const pullFromRemote = async (projectPath) => {
   return true;
 };
 
+const setGitRemote = async (projectPath, remoteUrl) => {
+  if (!remoteUrl || !remoteUrl.trim()) throw new Error('Remote URL is required');
+  const git = simpleGit(projectPath);
+  const isRepo = await git.checkIsRepo();
+  if (!isRepo) throw new Error('Project is not a Git repository yet');
+  const remotes = await git.getRemotes(true);
+  const origin = remotes.find((r) => r.name === 'origin');
+  if (!origin) {
+    await git.addRemote('origin', remoteUrl.trim());
+  } else {
+    await git.remote(['set-url', 'origin', remoteUrl.trim()]);
+  }
+  return true;
+};
+
 export {
   NOVELIST_ROOT,
   ensureProjectStructure,
@@ -406,5 +421,6 @@ export {
   initGitRepo,
   commitCurrentChanges,
   pushToRemote,
-  pullFromRemote
+  pullFromRemote,
+  setGitRemote
 };

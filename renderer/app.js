@@ -6,6 +6,9 @@ function subscribeToMenuEvents() {
   window.appMenu.on('menu:export', handleExport);
   window.appMenu.on('menu:toggle-sidebar', toggleSidebar);
   window.appMenu.on('menu:git-commit', async () => { if (state.project) await handleCommit(); });
+  window.appMenu.on('menu:git-set-remote', async () => { if (state.project) await handleSetRemote(); });
+  window.appMenu.on('menu:find', async () => { await handleFind(); });
+  window.appMenu.on('menu:replace', async () => { await handleReplace(); });
   window.appMenu.on('menu:git-init', async () => {
     if (!state.project) return;
     try {
@@ -23,7 +26,13 @@ function subscribeToMenuEvents() {
       showToast('Pushed to remote');
     } catch (e) {
       console.error('Push failed', e);
-      showToast(`Push failed: ${e.message}`, { type: 'error' });
+      const msg = e?.message || '';
+      if (/no configured push destination|set the remote|no upstream/i.test(msg)) {
+        const set = window.confirm('No remote configured for this project. Set origin now?');
+        if (set) await handleSetRemote();
+      } else {
+        showToast(`Push failed: ${msg}`, { type: 'error' });
+      }
     }
   });
   window.appMenu.on('menu:git-pull', async () => {
@@ -45,6 +54,22 @@ function subscribeToMenuEvents() {
     overlay.classList.remove('hidden');
     renderTutorialStep();
   });
+}
+
+async function handleSetRemote() {
+  if (!state.project) return;
+  const url = await promptInput({
+    title: 'Set Git Remote URL',
+    placeholder: 'https://codeberg.org/youruser/yourrepo.git'
+  });
+  if (!url) return;
+  try {
+    await window.novelist.git.setRemote(state.project.path, url.trim());
+    showToast('Git remote set to origin');
+  } catch (e) {
+    console.error('Set remote failed', e);
+    showToast(`Set remote failed: ${e.message}`, { type: 'error' });
+  }
 }
 /* global Quill, TurndownService */
 
@@ -341,6 +366,77 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   init();
 });
+
+function getEditorElement() {
+  // Quill root in rich mode or plain editor div fallback
+  return document.getElementById('plain-editor') || (quill && quill.root);
+}
+
+async function handleFind() {
+  const needle = await promptInput({ title: 'Find', placeholder: 'Search text' });
+  if (!needle) return;
+  const root = getEditorElement();
+  if (!root) return;
+  const idx = (root.innerText || '').indexOf(needle);
+  if (idx < 0) {
+    showToast('Not found', { type: 'error' });
+    return;
+  }
+  // Highlight by selecting in Quill; plain editor uses selection ranges
+  if (quill && quill.getText) {
+    // Map innerText index to Quill delta index by scanning text
+    const text = quill.getText();
+    const start = text.indexOf(needle);
+    if (start >= 0) quill.setSelection(start, needle.length, 'api');
+  } else {
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let pos = 0; let node;
+    while ((node = walker.nextNode())) {
+      const next = pos + node.nodeValue.length;
+      if (idx >= pos && idx < next) {
+        const range = document.createRange();
+        range.setStart(node, idx - pos);
+        range.setEnd(node, Math.min(idx - pos + needle.length, node.nodeValue.length));
+        selection.addRange(range);
+        break;
+      }
+      pos = next;
+    }
+  }
+}
+
+async function handleReplace() {
+  const needle = await promptInput({ title: 'Find', placeholder: 'Search text' });
+  if (!needle) return;
+  const replacement = await promptInput({ title: 'Replace with', placeholder: '' });
+  if (replacement === null) return;
+
+  if (quill && quill.getText) {
+    const text = quill.getText();
+    const idx = text.indexOf(needle);
+    if (idx < 0) { showToast('Not found', { type: 'error' }); return; }
+    quill.deleteText(idx, needle.length, 'api');
+    quill.insertText(idx, replacement, 'api');
+    quill.setSelection(idx, replacement.length, 'api');
+  } else {
+    const root = getEditorElement();
+    if (!root) return;
+    const html = root.innerHTML;
+    if (!html.includes(needle)) { showToast('Not found', { type: 'error' }); return; }
+    // Simple text replacement within HTML text nodes
+    function replaceInNode(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        node.nodeValue = node.nodeValue.replace(needle, replacement);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        node.childNodes.forEach(replaceInNode);
+      }
+    }
+    replaceInNode(root);
+  }
+  markDirty();
+}
 
 function showToast(message, options = {}) {
   if (!ui.toast) return;

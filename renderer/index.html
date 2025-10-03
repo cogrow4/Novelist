@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Novelist</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="tutorial-overlay" class="overlay hidden">
+      <div class="overlay-content">
+        <h1>Welcome to Novelist</h1>
+        <ol id="tutorial-steps"></ol>
+        <div class="overlay-actions">
+          <button id="tutorial-prev" class="ghost">Back</button>
+          <button id="tutorial-next" class="primary">Next</button>
+          <button id="tutorial-close" class="ghost">Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <main id="welcome-screen">
+      <div class="welcome-card">
+        <h1>Novelist</h1>
+        <p>Create beautiful stories without distraction.</p>
+        <div class="welcome-actions">
+          <button id="create-project" class="primary">Create New Project</button>
+          <button id="open-project" class="ghost">Open Existing Project</button>
+        </div>
+        <div class="project-list">
+          <h2>Recent Projects</h2>
+          <ul id="recent-projects"></ul>
+        </div>
+      </div>
+    </main>
+
+    <div id="new-project-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Name your project</h2>
+        <p class="modal-subtitle">Projects live in <code>~/Documents/Novelist/</code></p>
+        <input id="new-project-name" type="text" placeholder="My epic novel" autocomplete="off" />
+        <span id="new-project-error" class="modal-error hidden"></span>
+        <div class="modal-actions">
+          <button id="new-project-cancel" class="ghost">Cancel</button>
+          <button id="new-project-create" class="primary">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generic input modal (replaces window.prompt) -->
+    <div id="input-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2 id="input-modal-title">Enter value</h2>
+        <input id="input-modal-field" type="text" placeholder="" autocomplete="off" />
+        <span id="input-modal-error" class="modal-error hidden"></span>
+        <div class="modal-actions">
+          <button id="input-modal-cancel" class="ghost">Cancel</button>
+          <button id="input-modal-ok" class="primary">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="app" class="hidden">
+      <header class="top-bar">
+        <div class="project-info">
+          <span id="project-name">Untitled Project</span>
+        </div>
+        <div class="top-actions">
+          <button id="btn-new-chapter" class="ghost">New Chapter</button>
+          <button id="btn-export" class="ghost">Export</button>
+        </div>
+      </header>
+      <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-tabs">
+            <button data-tab="chapters" class="tab-button active">Chapters</button>
+            <button data-tab="characters" class="tab-button">Characters</button>
+            <button data-tab="notes" class="tab-button">Notes</button>
+          </div>
+          <div id="sidebar-content">
+            <div class="sidebar-section" data-section="chapters"></div>
+            <div class="sidebar-section hidden" data-section="characters"></div>
+            <div class="sidebar-section hidden" data-section="notes"></div>
+          </div>
+        </aside>
+        <section class="editor-pane">
+          <div class="editor-header">
+            <input id="entry-title" type="text" placeholder="Untitled" />
+            <div class="editor-meta" id="editor-meta">
+              <label class="font-size-control" for="font-size">
+                Font size
+                <select id="font-size">
+                  <option value="14">14</option>
+                  <option value="16" selected>16</option>
+                  <option value="18">18</option>
+                  <option value="20">20</option>
+                  <option value="22">22</option>
+                  <option value="24">24</option>
+                </select>
+              </label>
+              <div id="meta-fields"></div>
+              <span id="save-status">Saved</span>
+            </div>
+          </div>
+          <div id="editor-container">
+            <div id="editor-toolbar">
+              <span class="ql-formats">
+                <select class="ql-header">
+                  <option selected></option>
+                  <option value="2">Heading 2</option>
+                  <option value="3">Heading 3</option>
+                </select>
+                <button class="ql-bold"></button>
+                <button class="ql-italic"></button>
+                <button class="ql-underline"></button>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-list" value="ordered"></button>
+                <button class="ql-list" value="bullet"></button>
+                <button class="ql-blockquote"></button>
+                <button class="ql-code-block"></button>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-link"></button>
+                <button class="ql-image"></button>
+              </span>
+            </div>
+            <div id="editor"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+    <script src="../node_modules/marked/marked.min.js"></script>
+    <script src="../node_modules/turndown/dist/turndown.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

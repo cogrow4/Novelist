@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/package",
+  "name": "novelist",
+  "version": "1.0.0",
+  "description": "Novelist - A distraction-free writing application",
+  "main": "electron/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "package": "electron-builder"
+  },
+  "dependencies": {
+    "electron": "^29.3.0",
+    "electron-store": "^8.2.0",
+    "fs-extra": "^11.2.0",
+    "nanoid": "^4.0.2",
+    "marked": "^12.0.2",
+    "quill": "^1.3.7",
+    "simple-git": "^3.23.0",
+    "turndown": "^7.2.0"
+  }
+}

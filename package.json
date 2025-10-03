@@ -6,6 +6,7 @@
   "main": "electron/main.js",
   "type": "module",
   "license": "Unlicense",
+  "author": "CoGrow",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
@@ -59,8 +60,7 @@
         }
       ],
       "category": "Office",
-      "artifactName": "${productName}-${version}-${arch}.${ext}",
-      "icon": "icon/512-mac.png"
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     }
   },
   "dependencies": {

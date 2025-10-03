@@ -34,8 +34,7 @@
           "target": "dmg",
           "arch": ["universal"]
         }
-      ],
-      "icon": "icon/1024-mac.png"
+      ]
     },
     "dmg": {
       "artifactName": "${productName}-${version}-${arch}.${ext}"
@@ -46,8 +45,7 @@
           "target": "msi",
           "arch": ["x64"]
         }
-      ],
-      "icon": "icon/256-mac.png"
+      ]
     },
     "msi": {
       "artifactName": "${productName}-${version}-${arch}.${ext}"

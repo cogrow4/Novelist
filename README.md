@@ -164,3 +164,8 @@ PRs welcome! Please:
 ## License
 
 MIT © 2025
+
+## Credits
+
+Icon attribution:
+<a href="https://www.flaticon.com/free-icons/books" title="books icons">Books icons created by Freepik - Flaticon</a>

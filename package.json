@@ -14,7 +14,8 @@
     "build:all": "electron-builder -m dmg -w msi -l AppImage",
     "build:mac": "electron-builder -m dmg",
     "build:win": "electron-builder -w msi",
-    "build:linux": "electron-builder -l AppImage"
+    "build:linux": "electron-builder -l AppImage",
+    "icons:icns": "node scripts/gen-icns.js"
   },
   "build": {
     "appId": "org.novelist.app",
@@ -34,7 +35,8 @@
           "target": "dmg",
           "arch": ["universal"]
         }
-      ]
+      ],
+      "icon": "build/icon.icns"
     },
     "dmg": {
       "artifactName": "${productName}-${version}-${arch}.${ext}"
@@ -72,6 +74,7 @@
   },
   "devDependencies": {
     "electron-builder": "^24.9.1",
-    "electron": "^29.3.0"
+    "electron": "^29.3.0",
+    "sharp": "^0.33.4"
   }
 }

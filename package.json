@@ -9,10 +9,58 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "package": "electron-builder"
+    "package": "electron-builder",
+    "build:all": "electron-builder -m dmg -w msi -l AppImage",
+    "build:mac": "electron-builder -m dmg",
+    "build:win": "electron-builder -w msi",
+    "build:linux": "electron-builder -l AppImage"
+  },
+  "build": {
+    "appId": "org.novelist.app",
+    "productName": "Novelist",
+    "files": [
+      "electron/**",
+      "renderer/**",
+      "package.json"
+    ],
+    "asar": true,
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["universal"]
+        }
+      ]
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "msi",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "msi": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Office",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    }
   },
   "dependencies": {
-    "electron": "^29.3.0",
     "electron-store": "^8.2.0",
     "fs-extra": "^11.2.0",
     "nanoid": "^4.0.2",
@@ -20,5 +68,9 @@
     "quill": "^1.3.7",
     "simple-git": "^3.23.0",
     "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.9.1",
+    "electron": "^29.3.0"
   }
 }

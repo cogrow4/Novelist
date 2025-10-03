@@ -6,10 +6,18 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
 jobs:
   build-macos:
     name: macOS (Universal DMG)
     runs-on: macos-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,6 +25,11 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm ci
+      - name: Check GH_TOKEN presence
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then echo "GH_TOKEN is NOT set"; exit 1; else echo "GH_TOKEN is set"; fi
+      - name: Generate mac icon (.icns)
+        run: npm run icons:icns
       - name: Build DMG (universal)
         run: npm run build:mac
       - name: Upload DMG
@@ -28,6 +41,8 @@ jobs:
   build-windows:
     name: Windows (MSI x64)
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,6 +54,10 @@ jobs:
           choco install wixtoolset -y
       - name: Install dependencies
         run: npm ci
+      - name: Check GH_TOKEN presence
+        shell: pwsh
+        run: |
+          if (-not $Env:GH_TOKEN) { Write-Host "GH_TOKEN is NOT set"; exit 1 } else { Write-Host "GH_TOKEN is set" }
       - name: Build MSI
         run: npm run build:win
       - name: Upload MSI
@@ -50,6 +69,8 @@ jobs:
   build-linux:
     name: Linux (AppImage x64)
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -57,6 +78,9 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm ci
+      - name: Check GH_TOKEN presence
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then echo "GH_TOKEN is NOT set"; exit 1; else echo "GH_TOKEN is set"; fi
       - name: Build AppImage
         run: npm run build:linux
       - name: Upload AppImage

@@ -269,6 +269,57 @@ main#welcome-screen {
   padding-left: 12px;
 }
 
+/* Inline rows and small bin icons */
+.sidebar-item .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-item .row strong {
+  flex: 1;
+}
+
+.sidebar-item .row .meta {
+  margin-left: auto;
+}
+
+.icon-bin {
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.icon-bin:hover {
+  opacity: 1;
+  background: transparent;
+  transform: none;
+}
+
+/* Scenes inline */
+.sidebar-scene {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+/* Show delete icon on hover to keep UI clean */
+.sidebar-item .icon-bin,
+.sidebar-scene .icon-bin {
+  visibility: hidden;
+}
+
+.sidebar-item:hover .icon-bin,
+.sidebar-scene:hover .icon-bin {
+  visibility: visible;
+}
+
 .editor-pane {
   display: flex;
   flex-direction: column;

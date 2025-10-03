@@ -2,6 +2,7 @@ function subscribeToMenuEvents() {
   if (!window.appMenu || typeof window.appMenu.on !== 'function') return;
   window.appMenu.on('menu:new-project', openNewProjectModal);
   window.appMenu.on('menu:open-project', handleOpenProject);
+  window.appMenu.on('menu:open-recent', (path) => { if (path) openProjectByPath(path); });
   window.appMenu.on('menu:export', handleExport);
   window.appMenu.on('menu:toggle-sidebar', toggleSidebar);
   window.appMenu.on('menu:git-commit', async () => { if (state.project) await handleCommit(); });

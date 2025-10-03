@@ -50,6 +50,7 @@ contextBridge.exposeInMainWorld('appMenu', {
     const allowed = new Set([
       'menu:new-project',
       'menu:open-project',
+      'menu:open-recent',
       'menu:export',
       'menu:toggle-sidebar',
       'menu:git-commit',

@@ -38,6 +38,14 @@ const createWindow = () => {
 };
 
 const createMenu = () => {
+  const recent = (store.get('recentProjects') || []).slice(0, 5);
+  const recentItems = recent.length
+    ? recent.map((p) => ({
+        label: p,
+        click: () => mainWindow?.webContents.send('menu:open-recent', p)
+      }))
+    : [{ label: 'No Recent Projects', enabled: false }];
+
   const template = [
     {
       label: 'File',
@@ -51,6 +59,10 @@ const createMenu = () => {
           label: 'Open Project',
           accelerator: 'CmdOrCtrl+O',
           click: () => mainWindow.webContents.send('menu:open-project')
+        },
+        {
+          label: 'Open Recent Project',
+          submenu: recentItems
         },
         { type: 'separator' },
         {
@@ -280,5 +292,7 @@ ipcMain.handle('preferences:get', () => {
 
 ipcMain.handle('preferences:set', (_event, values) => {
   store.set(values);
+  // Rebuild menu to refresh recent projects submenu
+  createMenu();
   return store.store;
 });

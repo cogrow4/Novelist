@@ -5,6 +5,7 @@
   "description": "Novelist - A distraction-free writing application",
   "main": "electron/main.js",
   "type": "module",
+  "license": "Unlicense",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",

@@ -94,13 +94,31 @@ Format:           Markdown-backed content (portable & VCS-friendly)
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 📦 Download Pre-Built Binaries (Recommended)
+
+Get the latest release for your platform from the [Releases page](https://github.com/cogrow4/Novelist/releases).
+
+**Available Platforms:**
+- **macOS:** Universal DMG (Intel + Apple Silicon)
+- **Windows:** MSI (x64) or NSIS Setup (ARM64)
+- **Linux:** AppImage, DEB, or RPM packages
+  - Supports x64, ARM64, and ARMv7l architectures
+
+Just download, install, and start writing!
+
+---
+
+### 🛠️ Build From Source
+
+For developers or those who want to build from source:
+
+#### Prerequisites
 
 - **Node.js 18+** (recommended)
 - **macOS, Windows, or Linux**
 - **Git** (optional, for version control features)
 
-### Installation
+#### Installation
 
 ```bash
 # Clone the repository

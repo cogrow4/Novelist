@@ -14,10 +14,17 @@
     "build:all": "electron-builder -m dmg -w msi -l AppImage",
     "build:mac": "electron-builder -m dmg",
     "build:win": "electron-builder -w msi",
+    "build:win:arm64": "electron-builder -w nsis --arm64",
     "build:linux": "electron-builder -l AppImage",
+    "build:linux:arm64": "electron-builder -l AppImage --arm64",
+    "build:linux:armv7l": "electron-builder -l AppImage --armv7l",
+    "build:linux:deb": "electron-builder -l deb",
+    "build:linux:rpm": "electron-builder -l rpm",
     "icons:icns": "node scripts/gen-icns.js",
     "icons:ico": "node scripts/gen-ico.js",
-    "icons:all": "npm run icons:icns && npm run icons:ico"
+    "icons:all": "npm run icons:icns && npm run icons:ico",
+    "release:check": "node scripts/check-release.js",
+    "release:prepare": "node scripts/prepare-release.js"
   },
   "build": {
     "appId": "org.novelist.app",
@@ -52,6 +59,13 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "build/icon.ico"
@@ -59,12 +73,34 @@
     "msi": {
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
+    "nsis": {
+      "artifactName": "${productName}-${version}-${arch}-Setup.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "linux": {
       "target": [
         {
           "target": "AppImage",
           "arch": [
-            "x64"
+            "x64",
+            "arm64",
+            "armv7l"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64",
+            "armv7l"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64",
+            "arm64"
           ]
         }
       ],

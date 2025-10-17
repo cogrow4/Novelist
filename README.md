@@ -9,7 +9,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/cogrow4/Novelist?style=for-the-badge&logo=github&color=6366f1)](https://github.com/cogrow4/Novelist/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/cogrow4/Novelist?style=for-the-badge&logo=github&color=6366f1)](https://github.com/cogrow4/Novelist/network)
 [![GitHub issues](https://img.shields.io/github/issues/cogrow4/Novelist?style=for-the-badge&logo=github&color=6366f1)](https://github.com/cogrow4/Novelist/issues)
-[![License](https://img.shields.io/badge/License-MIT-6366f1?style=for-the-badge)](./LICENSE)
+[![License](https://img.shields.io/badge/License-Unlicense-6366f1?style=for-the-badge)](./LICENSE)
 
 [![Built with Electron](https://img.shields.io/badge/Built_with-Electron-47848f?style=for-the-badge&logo=electron)](https://www.electronjs.org/)
 [![Powered by Quill](https://img.shields.io/badge/Powered_by-Quill-1d4ed8?style=for-the-badge)](https://quilljs.com/)
@@ -361,23 +361,29 @@ Contributions are what make the open-source community amazing! Any contributions
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Unlicense** - see the [LICENSE](LICENSE) file for details.
 
 ### License Summary
 
+This software is released into the **public domain**. You are free to do whatever you want with it.
+
 ✅ **You CAN:**
-- Use for personal and commercial projects
-- Modify and adapt the code
-- Distribute and share
+- Use for any purpose (personal, commercial, etc.)
+- Modify and adapt the code however you like
+- Distribute and share freely
 - Use in proprietary software
 - Sell products built with this code
+- Remove all attribution and copyright notices
+- Relicense under any terms you choose
 
-✅ **You MUST:**
-- Include the original copyright notice
-- Include the license in distributions
+❌ **You DON'T HAVE TO:**
+- Give credit or attribution
+- Include the license
+- Share your modifications
+- Release source code
 
 📜 **No Warranty:**
-- Software provided "as is" without warranty
+- Software provided "as is" without warranty of any kind
 
 ---
 

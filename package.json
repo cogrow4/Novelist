@@ -105,6 +105,13 @@
         }
       ],
       "category": "Office",
+      "maintainer": "CoGrow <contact@cogrow.org>",
+      "desktop": {
+        "Name": "Novelist",
+        "Comment": "A distraction-free writing application",
+        "Categories": "Office;WordProcessor;"
+      },
+      "icon": "build/icon.png",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     }
   },

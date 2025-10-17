@@ -1,171 +1,412 @@
-# Novelist
+<div align="center">
 
-A distraction‑free desktop writing app for long‑form fiction. Organize chapters and scenes, keep character sheets and planning notes, and write in a focused editor with automatic saving. Built with Electron and a rich‑text editor backed by Markdown.
+# 📚 Novelist
 
-## Highlights
+### Distraction-Free Desktop Writing App for Authors
 
-- **Clean writing UI** powered by Quill with a plain contenteditable fallback.
-- **Project model** stored as Markdown in `~/Documents/Novelist/<project-id>/`.
-  - `chapters/*.md` and per‑chapter `*-scenes/*.md`
-  - `characters/*.md` and `notes/*.md`
-  - `project.json` metadata (name, timestamps).
-- **Chapters & Scenes** sidebar with quick navigation and counts.
-- **Characters & Notes** tabs. Notes are grouped by category.
-- **Auto‑save** after brief idle and manual flush on window close.
-- **Export** to a single Markdown file that concatenates chapters and scenes.
-- **Recent Projects** list at the welcome screen (MRU + on‑disk scan).
-- **Preferences** (font size, last opened project) stored via `electron-store`.
-- **Git integration** (init, commit, push, pull) using `simple-git`.
-- **Keyboard**: Toggle sidebar (Cmd/Ctrl+B), commit (Cmd/Ctrl+Shift+C), plus native editing.
+*Your creative companion for crafting long-form fiction with focus and clarity*
 
-## Quick start
+[![GitHub stars](https://img.shields.io/github/stars/cogrow4/Novelist?style=for-the-badge&logo=github&color=6366f1)](https://github.com/cogrow4/Novelist/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/cogrow4/Novelist?style=for-the-badge&logo=github&color=6366f1)](https://github.com/cogrow4/Novelist/network)
+[![GitHub issues](https://img.shields.io/github/issues/cogrow4/Novelist?style=for-the-badge&logo=github&color=6366f1)](https://github.com/cogrow4/Novelist/issues)
+[![License](https://img.shields.io/badge/License-MIT-6366f1?style=for-the-badge)](./LICENSE)
+
+[![Built with Electron](https://img.shields.io/badge/Built_with-Electron-47848f?style=for-the-badge&logo=electron)](https://www.electronjs.org/)
+[![Powered by Quill](https://img.shields.io/badge/Powered_by-Quill-1d4ed8?style=for-the-badge)](https://quilljs.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js)](https://nodejs.org/)
+
+[🐛 Report Bug](https://github.com/cogrow4/Novelist/issues) • [✨ Request Feature](https://github.com/cogrow4/Novelist/issues)
+
+---
+
+</div>
+
+## 📋 Table of Contents
+
+- [✨ Features](#-features)
+- [🎯 What Makes This Special](#-what-makes-this-special)
+- [🚀 Quick Start](#-quick-start)
+- [📁 Project Storage](#-project-storage)
+- [⚙️ Configuration](#️-configuration)
+- [💻 Development](#-development)
+- [🔧 Troubleshooting](#-troubleshooting)
+- [🗺️ Roadmap](#️-roadmap)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [💖 Credits](#-credits)
+
+---
+
+## ✨ Features
+
+<div align="center">
+
+| Feature | Description |
+|---------|-------------|
+| ✍️ **Clean Writing UI** | Rich-text editor powered by Quill with automatic fallback |
+| 📖 **Chapters & Scenes** | Organize your story with nested structure and quick navigation |
+| 👥 **Character Sheets** | Keep track of your cast with dedicated character profiles |
+| 📝 **Planning Notes** | Categorized notes for worldbuilding, outlines, and research |
+| 💾 **Auto-Save** | Never lose your work with automatic saving and manual flush |
+| 📊 **Word Counts** | Live tracking for current document and total project words |
+| 📤 **Export** | Compile your entire project into a single Markdown file |
+| 🔄 **Git Integration** | Built-in version control with init, commit, push, and pull |
+| 📂 **Project Management** | Recent projects list and quick-access welcome screen |
+| ⚡ **Keyboard Shortcuts** | Toggle sidebar (Cmd/Ctrl+B), commit (Cmd/Ctrl+Shift+C) |
+| 🔒 **Privacy First** | All data stays local - no telemetry, no cloud sync |
+| 📝 **Markdown Storage** | Portable, diff-friendly format for version control |
+
+</div>
+
+---
+
+## 🎯 What Makes This Special
+
+### 🏗️ Built With Modern Technology
+
+```
+Frontend:         Electron + Quill Rich Text Editor
+Storage:          Local Markdown Files (~/Documents/Novelist/)
+State:            electron-store for preferences
+Version Control:  simple-git integration
+Architecture:     IPC bridge with secure context isolation
+Format:           Markdown-backed content (portable & VCS-friendly)
+```
+
+### 🎪 Key Capabilities
+
+- **Project Model**: Each project is a folder with Markdown files for chapters, scenes, characters, and notes
+- **Hierarchical Structure**: Chapters contain scenes; scenes are stored as nested files
+- **Live Preview**: Rich formatting toolbar with headings, lists, code blocks, and links
+- **Contextual UI**: Meta panel adapts to show relevant fields (Note category, save status)
+- **Tutorial System**: Built-in tips and tutorial overlay accessible from Help menu
+- **Cross-Platform**: Works on macOS, Windows, and Linux
+
+### 📚 Perfect For Writers Who Want
+
+- 🎯 **Focus**: Distraction-free interface that keeps you in the creative flow
+- 🗂️ **Organization**: Clear structure for complex stories with multiple plot threads
+- 💾 **Safety**: Automatic saving with Git backup for peace of mind
+- 🚀 **Simplicity**: No cloud accounts, no subscriptions, just write
+- 🔓 **Freedom**: Your files stay yours - portable Markdown format
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js 18+** (recommended)
+- **macOS, Windows, or Linux**
+- **Git** (optional, for version control features)
+
+### Installation
 
 ```bash
-# Requirements: Node 18+ (recommended), macOS/Windows/Linux
-pnpm i   # or: npm install / yarn
+# Clone the repository
+git clone https://github.com/cogrow4/Novelist.git
+
+# Navigate to project directory
+cd Novelist
+
+# Install dependencies
+pnpm i
+# or: npm install / yarn
+```
+
+### Running the App
+
+```bash
+# Start Novelist
 npm start
+
+# Development mode (with DevTools)
+NODE_ENV=development npm start
 ```
 
-The welcome screen lets you:
-- Create a new project (stored in `~/Documents/Novelist/`).
-- Open an existing project folder.
-- Reopen a recent project from the list.
+### First Launch
 
-## Project storage
+The welcome screen provides three options:
 
-Each project lives under `~/Documents/Novelist/` by default. Example layout:
+1. **Create New Project** - Stored automatically in `~/Documents/Novelist/`
+2. **Open Existing Project** - Browse to any project folder
+3. **Recent Projects** - Quick access to your recent work
+
+---
+
+## 📁 Project Storage
+
+Each project lives under `~/Documents/Novelist/` by default. All content is stored as Markdown files for portability and version control compatibility.
+
+### Project Structure
 
 ```
-Novelist/
-  my-story-abc123/
-    project.json
+~/Documents/Novelist/
+  my-novel-abc123/
+    project.json                    # Project metadata
     chapters/
-      chapter-1-xxxx.md
-      chapter-1-xxxx-scenes/
+      chapter-1-xxxx.md            # Chapter content
+      chapter-1-xxxx-scenes/       # Nested scenes
         scene-intro-yyyy.md
+        scene-climax-zzzz.md
+      chapter-2-qqqq.md
     characters/
-      protagonist-zzzz.md
+      protagonist-aaaa.md          # Character profiles
+      antagonist-bbbb.md
     notes/
-      outline-qqqq.md
+      outline-cccc.md              # Planning notes
+      worldbuilding-dddd.md
 ```
 
-All content is Markdown so it remains portable and diff‑friendly.
+### Why Markdown?
 
-## Features in the UI
+- ✅ **Portable**: Open in any text editor
+- ✅ **Version Control**: Perfect for Git diffs
+- ✅ **Future-Proof**: Plain text will always be readable
+- ✅ **Searchable**: Use grep, ripgrep, or any search tool
 
-- **Editor**: Rich formatting toolbar (headings, lists, code, links). If Quill fails to load, a plain editor is used automatically.
-- **Word counts**: Live count for the editor and total words across chapters.
-- **Meta panel**: Contextual fields like Note category and save status.
-- **Tutorial tips**: Lightweight overlay accessible from Help → Tips & Tutorial.
+---
 
-## Git integration
+## ⚙️ Configuration
 
-From the menu: Git → Initialize/Commit/Push/Pull. Credentials are handled by your system Git; there is no in‑app sign‑in. Under the hood, the main process invokes `simple-git` against the project path.
+### Preferences
 
-## Export
+Novelist stores preferences using `electron-store`:
 
-File → Export Project writes `<project-name>-export.md` into the project folder, combining all chapters followed by their scenes.
+- Font size for the editor
+- Last opened project
+- Recently used projects list (MRU)
 
-## Architecture
+Access via: **Edit → Preferences** (or app menu on macOS)
 
-- **Renderer** (`renderer/`)
-  - `index.html` — layout and assets
-  - `app.js` — UI, editor logic, rendering, auto‑save, MRU recents
-- **Main** (`electron/`)
-  - `main.js` — window creation, app menu, IPC handlers, preferences
-  - `preload.js` — secure context bridge exposing `window.novelist` and menu events
-  - `project-manager.js` — filesystem model, project CRUD, chapters/scenes/characters/notes, export, git helpers
+### Editor Features
 
-### IPC surface (preload → main)
-
-```ts
-// projects
-projects.create(name)
-projects.list()
-projects.openDialog()
-projects.load(projectPath)
-
-// chapters
-chapters.list(projectPath)
-chapters.create(projectPath, name)
-chapters.save(projectPath, chapterId, payload)
-chapters.createScene(projectPath, chapterId, sceneName)
-chapters.saveScene(projectPath, chapterId, sceneId, payload)
-
-// characters
-characters.list(projectPath)
-characters.save(projectPath, characterId, payload)
-
-// notes
-notes.list(projectPath)
-notes.save(projectPath, noteId, payload)
-
-// export
-exports.project(projectPath)
-
-// git
-git.init(projectPath)
-git.commit(projectPath, message)
-git.push(projectPath)
-git.pull(projectPath)
-
-// preferences
-preferences.get()
-preferences.set(values)
+```javascript
+// Rich-text formatting
+- Headings (H1-H6)
+- Bold, Italic, Underline
+- Bulleted and Numbered Lists
+- Code Blocks
+- Links
+- Blockquotes
 ```
 
-## Development
+### Keyboard Shortcuts
 
-- Code entry: `electron/main.js` (ESM) with a CommonJS preload (`electron/preload.js`) for compatibility with Electron’s preload environment.
-- Styling is in `renderer/styles.css`. The editor toolbar and content live under `#editor-toolbar` and `#editor`.
-- Run with DevTools auto‑open in development mode by setting `NODE_ENV=development`.
+| Action | macOS | Windows/Linux |
+|--------|-------|---------------|
+| Toggle Sidebar | `Cmd+B` | `Ctrl+B` |
+| Git Commit | `Cmd+Shift+C` | `Ctrl+Shift+C` |
+| Save | `Cmd+S` | `Ctrl+S` |
+| New Chapter | Menu | Menu |
+| Export Project | Menu | Menu |
 
-### Scripts
+---
 
-```jsonc
-{
-  "start": "electron .",
-  "dev": "electron .",
-  "package": "electron-builder"
-}
+## 💻 Development
+
+### Architecture Overview
+
+```
+novelist/
+├── electron/
+│   ├── main.js              # Main process (ESM)
+│   ├── preload.js           # Context bridge (CommonJS)
+│   └── project-manager.js   # File system & Git operations
+├── renderer/
+│   ├── index.html          # UI layout
+│   ├── app.js              # Frontend logic
+│   └── styles.css          # Styling
+└── package.json
 ```
 
-Packaging is wired for `electron-builder`; add a config or run it in a CI/CD workflow as needed.
+### IPC Communication
 
-## Troubleshooting
+The app uses a secure IPC bridge (`preload → main`):
 
-- "Could not open project: Cannot set properties of null (setting 'textContent')":
-  - Fixed by guarding missing DOM nodes; if you see it again, open DevTools and share the stack trace.
-- Recent Projects not showing:
-  - The app scans `~/Documents/Novelist/` and merges MRU from preferences. Ensure your projects contain a `project.json`.
-- Quill not loading:
-  - The app falls back to a plain editor and tries a CDN if the local asset is missing.
-- Git errors:
-  - Ensure the project folder is a repo (Git → Initialize) and your system Git is configured (ssh/https credentials).
+```typescript
+// Projects
+window.novelist.projects.create(name)
+window.novelist.projects.list()
+window.novelist.projects.openDialog()
+window.novelist.projects.load(projectPath)
 
-## Privacy and data
+// Chapters & Scenes
+window.novelist.chapters.list(projectPath)
+window.novelist.chapters.create(projectPath, name)
+window.novelist.chapters.save(projectPath, chapterId, payload)
+window.novelist.chapters.createScene(projectPath, chapterId, sceneName)
+window.novelist.chapters.saveScene(projectPath, chapterId, sceneId, payload)
 
-Your writing stays on your machine. Projects are local Markdown files. No telemetry.
+// Characters & Notes
+window.novelist.characters.list(projectPath)
+window.novelist.characters.save(projectPath, characterId, payload)
+window.novelist.notes.list(projectPath)
+window.novelist.notes.save(projectPath, noteId, payload)
 
-## Roadmap
+// Export & Git
+window.novelist.exports.project(projectPath)
+window.novelist.git.init(projectPath)
+window.novelist.git.commit(projectPath, message)
+window.novelist.git.push(projectPath)
+window.novelist.git.pull(projectPath)
 
-- Export to EPUB/PDF
-- Search across chapters/notes
-- Per‑scene metadata and reordering
-- Theming and typewriter mode
+// Preferences
+window.novelist.preferences.get()
+window.novelist.preferences.set(values)
+```
 
-## Contributing
+### Available Scripts
 
-PRs welcome! Please:
-- Keep features scoped and maintain the local‑file model.
-- Add clear error handling and UI fallbacks.
-- Test on macOS at minimum; Linux/Windows fixes are appreciated.
+```bash
+# Start the app
+npm start
 
-## License
+# Development mode with DevTools
+npm run dev
 
-MIT © 2025
+# Package for distribution
+npm run package
+```
 
-## Credits
+### Development Tips
 
-Icon attribution:
-<a href="https://www.flaticon.com/free-icons/books" title="books icons">Books icons created by Freepik - Flaticon</a>
+- 📝 Editor logic lives in `renderer/app.js`
+- 🎨 Styles are in `renderer/styles.css`
+- 🔧 Main process entry is `electron/main.js` (ESM)
+- 🔒 Preload script is CommonJS for Electron compatibility
+- 🐛 Set `NODE_ENV=development` to auto-open DevTools
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**"Could not open project" error**
+- Fixed by guarding missing DOM nodes
+- Open DevTools and check console for detailed stack trace
+- Ensure `project.json` exists in the project folder
+
+**Recent Projects not showing**
+- Novelist scans `~/Documents/Novelist/` on launch
+- Projects must contain a valid `project.json` file
+- Check that the projects directory exists
+
+**Quill editor not loading**
+- App automatically falls back to plain contenteditable editor
+- Tries CDN fallback if local Quill asset is missing
+- Check network connection and browser console
+
+**Git integration errors**
+- Ensure project is initialized (Git → Initialize)
+- System Git must be configured with credentials
+- SSH keys or HTTPS credentials needed for push/pull
+- Check that remote repository exists and is accessible
+
+**Auto-save not working**
+- Auto-save triggers after brief idle period
+- Manual save on window close is guaranteed
+- Check file permissions in project directory
+
+---
+
+## 🗺️ Roadmap
+
+Future features planned for Novelist:
+
+- 📚 **Export to EPUB/PDF** - Publish-ready formats
+- 🔍 **Search Across Project** - Find text in all chapters and notes
+- 🎯 **Scene Metadata** - Add tags, status, and custom fields
+- 🔄 **Scene Reordering** - Drag-and-drop scene organization
+- 🎨 **Theming System** - Custom color schemes and fonts
+- ⌨️ **Typewriter Mode** - Zen writing with centered cursor
+- 📊 **Writing Statistics** - Daily goals and progress tracking
+- 🔗 **Internal Links** - Reference characters and notes within text
+- 📱 **Mobile Companion** - Read-only mobile app for reviewing
+
+---
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community amazing! Any contributions you make are **greatly appreciated**.
+
+### How to Contribute
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Contribution Guidelines
+
+- ✅ Keep features scoped and maintain the local-file model
+- ✅ Add clear error handling and UI fallbacks
+- ✅ Test on macOS at minimum; Linux/Windows fixes appreciated
+- ✅ Follow existing code style and conventions
+- ✅ Write meaningful commit messages
+- ✅ Update documentation as needed
+- ✅ Add comments for complex logic
+
+### Development Standards
+
+- Use ESM in main process, CommonJS in preload
+- Maintain IPC security with context isolation
+- Preserve Markdown storage format
+- Keep UI responsive during file operations
+- Test with multiple projects and edge cases
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### License Summary
+
+✅ **You CAN:**
+- Use for personal and commercial projects
+- Modify and adapt the code
+- Distribute and share
+- Use in proprietary software
+- Sell products built with this code
+
+✅ **You MUST:**
+- Include the original copyright notice
+- Include the license in distributions
+
+📜 **No Warranty:**
+- Software provided "as is" without warranty
+
+---
+
+## 💖 Credits
+
+### Created By
+
+**coeng24** - [GitHub](https://github.com/cogrow4)
+
+### Technologies Used
+
+- [Electron](https://www.electronjs.org/) - Cross-platform desktop framework
+- [Quill](https://quilljs.com/) - Rich text editor
+- [simple-git](https://github.com/steveukx/git-js) - Git integration for Node.js
+- [electron-store](https://github.com/sindresorhus/electron-store) - Persistent storage
+- [Flaticon](https://www.flaticon.com/) - Application icons
+
+### Inspiration
+
+Built for writers who need a focused, distraction-free environment without sacrificing powerful organizational tools. Inspired by Scrivener, Ulysses, and the simplicity of Markdown.
+
+---
+
+<div align="center">
+
+### ⭐ Star this repository if you find it helpful!
+
+**Made with ❤️ for writers everywhere**
+
+[⬆ Back to Top](#-novelist)
+
+</div>

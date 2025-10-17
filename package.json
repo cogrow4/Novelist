@@ -15,7 +15,9 @@
     "build:mac": "electron-builder -m dmg",
     "build:win": "electron-builder -w msi",
     "build:linux": "electron-builder -l AppImage",
-    "icons:icns": "node scripts/gen-icns.js"
+    "icons:icns": "node scripts/gen-icns.js",
+    "icons:ico": "node scripts/gen-ico.js",
+    "icons:all": "npm run icons:icns && npm run icons:ico"
   },
   "build": {
     "appId": "org.novelist.app",
@@ -33,7 +35,9 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["universal"]
+          "arch": [
+            "universal"
+          ]
         }
       ],
       "icon": "build/icon.icns"
@@ -45,9 +49,12 @@
       "target": [
         {
           "target": "msi",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
-      ]
+      ],
+      "icon": "build/icon.ico"
     },
     "msi": {
       "artifactName": "${productName}-${version}-${arch}.${ext}"
@@ -56,7 +63,9 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "category": "Office",
@@ -66,15 +75,16 @@
   "dependencies": {
     "electron-store": "^8.2.0",
     "fs-extra": "^11.2.0",
-    "nanoid": "^4.0.2",
     "marked": "^12.0.2",
+    "nanoid": "^4.0.2",
     "quill": "^1.3.7",
     "simple-git": "^3.23.0",
     "turndown": "^7.2.0"
   },
   "devDependencies": {
-    "electron-builder": "^24.9.1",
     "electron": "^29.3.0",
+    "electron-builder": "^24.9.1",
+    "png-to-ico": "^3.0.1",
     "sharp": "^0.33.4"
   }
 }

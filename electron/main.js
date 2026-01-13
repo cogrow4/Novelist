@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { checkAndCreateProject, listProjects, loadProject, saveChapter, createChapter, createScene, saveScene, listChapters, listCharacters, saveCharacter, listNotes, saveNote, exportProject, initGitRepo, commitCurrentChanges, ensureProjectStructure, pushToRemote, pullFromRemote, deleteChapter, deleteScene, deleteCharacter, deleteNote, setGitRemote } from './project-manager.js';
+import { checkAndCreateProject, listProjects, loadProject, saveChapter, createChapter, createScene, saveScene, listChapters, listCharacters, saveCharacter, listNotes, saveNote, exportProject, initGitRepo, commitCurrentChanges, ensureProjectStructure, pushToRemote, pullFromRemote, deleteChapter, deleteScene, deleteCharacter, deleteNote, setGitRemote, checkGitInstalled, cloneProject, configureGitUser, autoSync, getGitStatus, reorderChapters, reorderScenes, reorderNotes } from './project-manager.js';
 import Store from 'electron-store';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -41,9 +41,9 @@ const createMenu = () => {
   const recent = (store.get('recentProjects') || []).slice(0, 5);
   const recentItems = recent.length
     ? recent.map((p) => ({
-        label: p,
-        click: () => mainWindow?.webContents.send('menu:open-recent', p)
-      }))
+      label: p,
+      click: () => mainWindow?.webContents.send('menu:open-recent', p)
+    }))
     : [{ label: 'No Recent Projects', enabled: false }];
 
   const template = [
@@ -61,6 +61,10 @@ const createMenu = () => {
           click: () => mainWindow.webContents.send('menu:open-project')
         },
         {
+          label: 'Clone Project…',
+          click: () => mainWindow.webContents.send('menu:git-clone')
+        },
+        {
           label: 'Open Recent Project',
           submenu: recentItems
         },
@@ -69,6 +73,12 @@ const createMenu = () => {
           label: 'Export Project',
           accelerator: 'CmdOrCtrl+E',
           click: () => mainWindow.webContents.send('menu:export')
+        },
+        { type: 'separator' },
+        {
+          label: 'Settings…',
+          accelerator: 'CmdOrCtrl+,',
+          click: () => mainWindow.webContents.send('menu:settings')
         },
         { type: 'separator' },
         { role: 'quit' }
@@ -121,20 +131,6 @@ const createMenu = () => {
       label: 'Git',
       submenu: [
         {
-          label: 'Commit Changes',
-          accelerator: 'CmdOrCtrl+Shift+C',
-          click: () => mainWindow.webContents.send('menu:git-commit')
-        },
-        {
-          label: 'Initialize Repository',
-          click: () => mainWindow.webContents.send('menu:git-init')
-        },
-        {
-          label: 'Set Remote…',
-          click: () => mainWindow.webContents.send('menu:git-set-remote')
-        },
-        { type: 'separator' },
-        {
           label: 'Push',
           click: () => mainWindow.webContents.send('menu:git-push')
         },
@@ -144,8 +140,8 @@ const createMenu = () => {
         },
         { type: 'separator' },
         {
-          label: 'Sign In…',
-          click: () => mainWindow.webContents.send('menu:git-sign-in')
+          label: 'Get Started',
+          click: () => mainWindow.webContents.send('menu:git-wizard')
         }
       ]
     },
@@ -204,7 +200,12 @@ ipcMain.handle('projects:open-dialog', async () => {
     title: 'Select Novelist Project'
   });
   if (result.canceled || !result.filePaths?.length) return null;
+  if (result.canceled || !result.filePaths?.length) return null;
   return loadProject(result.filePaths[0]);
+});
+
+ipcMain.handle('projects:clone', async (_event, remoteUrl) => {
+  return cloneProject(remoteUrl);
 });
 
 ipcMain.handle('projects:load', async (_event, projectPath) => {
@@ -247,6 +248,16 @@ ipcMain.handle('chapters:delete-scene', async (_event, projectPath, chapterId, s
   return deleteScene(projectPath, chapterId, sceneId);
 });
 
+ipcMain.handle('chapters:reorder', async (_event, projectPath, chapterIds) => {
+  await ensureProjectStructure(projectPath);
+  return reorderChapters(projectPath, chapterIds);
+});
+
+ipcMain.handle('scenes:reorder', async (_event, projectPath, chapterId, sceneIds) => {
+  await ensureProjectStructure(projectPath);
+  return reorderScenes(projectPath, chapterId, sceneIds);
+});
+
 
 ipcMain.handle('characters:list', async (_event, projectPath) => {
   await ensureProjectStructure(projectPath);
@@ -279,6 +290,11 @@ ipcMain.handle('notes:delete', async (_event, projectPath, noteId) => {
   return deleteNote(projectPath, noteId);
 });
 
+ipcMain.handle('notes:reorder', async (_event, projectPath, noteIds) => {
+  await ensureProjectStructure(projectPath);
+  return reorderNotes(projectPath, noteIds);
+});
+
 
 ipcMain.handle('project:export', async (_event, projectPath) => {
   await ensureProjectStructure(projectPath);
@@ -303,6 +319,22 @@ ipcMain.handle('git:pull', async (_event, projectPath) => {
 
 ipcMain.handle('git:set-remote', async (_event, projectPath, remoteUrl) => {
   return setGitRemote(projectPath, remoteUrl);
+});
+
+ipcMain.handle('git:check-installed', async () => {
+  return checkGitInstalled();
+});
+
+ipcMain.handle('git:configure-user', async (_event, projectPath, username, email) => {
+  return configureGitUser(projectPath, username, email);
+});
+
+ipcMain.handle('git:auto-sync', async (_event, projectPath) => {
+  return autoSync(projectPath);
+});
+
+ipcMain.handle('git:status', async (_event, projectPath) => {
+  return getGitStatus(projectPath);
 });
 
 ipcMain.handle('preferences:get', () => {

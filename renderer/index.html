@@ -1,148 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Novelist</title>
-    <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="tutorial-overlay" class="overlay hidden">
-      <div class="overlay-content">
-        <h1>Welcome to Novelist</h1>
-        <ol id="tutorial-steps"></ol>
-        <div class="overlay-actions">
-          <button id="tutorial-prev" class="ghost">Back</button>
-          <button id="tutorial-next" class="primary">Next</button>
-          <button id="tutorial-close" class="ghost">Skip</button>
-        </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Novelist</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="tutorial-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h1>Welcome to Novelist</h1>
+      <ol id="tutorial-steps"></ol>
+      <div class="overlay-actions">
+        <button id="tutorial-prev" class="ghost">Back</button>
+        <button id="tutorial-next" class="primary">Next</button>
+        <button id="tutorial-close" class="ghost">Skip</button>
       </div>
     </div>
+  </div>
 
-    <main id="welcome-screen">
-      <div class="welcome-card">
-        <h1>Novelist</h1>
-        <p>Create beautiful stories without distraction.</p>
-        <div class="welcome-actions">
-          <button id="create-project" class="primary">Create New Project</button>
-          <button id="open-project" class="ghost">Open Existing Project</button>
-        </div>
-        <div class="project-list">
-          <h2>Recent Projects</h2>
-          <ul id="recent-projects"></ul>
-        </div>
+  <main id="welcome-screen">
+    <div class="welcome-card">
+      <h1>Novelist</h1>
+      <p>Create beautiful stories without distraction.</p>
+      <div class="welcome-actions">
+        <button id="create-project" class="primary">Create New Project</button>
+        <button id="open-project" class="ghost">Open Existing Project</button>
       </div>
-    </main>
+      <div class="project-list">
+        <h2>Recent Projects</h2>
+        <ul id="recent-projects"></ul>
+      </div>
+    </div>
+  </main>
 
-    <div id="new-project-modal" class="modal hidden">
-      <div class="modal-content">
-        <h2>Name your project</h2>
-        <p class="modal-subtitle">Projects live in <code>~/Documents/Novelist/</code></p>
-        <input id="new-project-name" type="text" placeholder="My epic novel" autocomplete="off" />
-        <span id="new-project-error" class="modal-error hidden"></span>
+  <div id="new-project-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Name your project</h2>
+      <p class="modal-subtitle">Projects live in <code>~/Documents/Novelist/</code></p>
+      <input id="new-project-name" type="text" placeholder="My epic novel" autocomplete="off" />
+      <span id="new-project-error" class="modal-error hidden"></span>
+      <div class="modal-actions">
+        <button id="new-project-cancel" class="ghost">Cancel</button>
+        <button id="new-project-create" class="primary">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic input modal (replaces window.prompt) -->
+  <div id="input-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="input-modal-title">Enter value</h2>
+      <input id="input-modal-field" type="text" placeholder="" autocomplete="off" />
+      <span id="input-modal-error" class="modal-error hidden"></span>
+      <div class="modal-actions">
+        <button id="input-modal-cancel" class="ghost">Cancel</button>
+        <button id="input-modal-ok" class="primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Git Setup Wizard -->
+  <div id="git-setup-modal" class="modal hidden">
+    <div class="modal-content wizard-content">
+      <div id="git-wizard-step-1" class="wizard-step">
+        <h2>Online Saving & Version Control</h2>
+        <p class="modal-subtitle">Would you like to back up your work to the cloud automatically?</p>
+        <div class="feature-list">
+          <div class="feature-item">☁️ Auto-sync every 30 mins</div>
+          <div class="feature-item">🛡️ Safe off-site backup</div>
+          <div class="feature-item">🕰️ Version history</div>
+        </div>
         <div class="modal-actions">
-          <button id="new-project-cancel" class="ghost">Cancel</button>
-          <button id="new-project-create" class="primary">Create</button>
+          <button id="git-setup-skip" class="ghost">No thanks</button>
+          <button id="git-setup-start" class="primary">Set up Online Saving</button>
         </div>
       </div>
-    </div>
 
-    <!-- Generic input modal (replaces window.prompt) -->
-    <div id="input-modal" class="modal hidden">
-      <div class="modal-content">
-        <h2 id="input-modal-title">Enter value</h2>
-        <input id="input-modal-field" type="text" placeholder="" autocomplete="off" />
-        <span id="input-modal-error" class="modal-error hidden"></span>
+      <div id="git-wizard-step-2" class="wizard-step hidden">
+        <h2>GitHub Setup</h2>
+        <p>We recommend GitHub for free, private story storage.</p>
+        <div class="step-guide">
+          <p>1. <a href="#" id="open-github-signup">Create a GitHub account</a> (if you don't have one)</p>
+          <p>2. Create a <strong>new empty repository</strong> on GitHub</p>
+          <p>3. Generate a <strong>Personal Access Token</strong> (Classic)</p>
+          <p class="text-sm">Scopes needed: <code>repo</code></p>
+        </div>
         <div class="modal-actions">
-          <button id="input-modal-cancel" class="ghost">Cancel</button>
-          <button id="input-modal-ok" class="primary">OK</button>
+          <button class="ghost" onclick="showWizardStep(1)">Back</button>
+          <button id="git-open-token-page" class="ghost">Open Token Page</button>
+          <button class="primary" onclick="showWizardStep(3)">I have a token</button>
+        </div>
+      </div>
+
+      <div id="git-wizard-step-3" class="wizard-step hidden">
+        <h2>Connect Account</h2>
+        <div class="input-group">
+          <label>GitHub Username</label>
+          <input type="text" id="git-username" placeholder="e.g. jdoe" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="git-email" placeholder="e.g. jdoe@example.com" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label>Remote Repository URL</label>
+          <input type="text" id="git-remote-url" placeholder="https://github.com/user/repo.git" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label>Personal Access Token</label>
+          <input type="password" id="git-token" placeholder="ghp_..." autocomplete="off">
+        </div>
+        <div class="modal-actions">
+          <button class="ghost" onclick="showWizardStep(2)">Back</button>
+          <button id="git-setup-finish" class="primary">Finish Setup</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <div id="app" class="hidden">
-      <header class="top-bar">
-        <div class="project-info">
-          <span id="project-name">Untitled Project</span>
+  <!-- Git Clone Modal -->
+  <div id="git-clone-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Clone Project</h2>
+      <p class="modal-subtitle">Download an existing project from GitHub</p>
+      <input id="clone-url" type="text" placeholder="https://github.com/user/project.git" autocomplete="off" />
+      <div class="modal-actions">
+        <button id="clone-cancel" class="ghost">Cancel</button>
+        <button id="clone-confirm" class="primary">Clone</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remote Setup Modal (shown after creating new project) -->
+  <div id="remote-setup-modal" class="modal hidden">
+    <div class="modal-content wizard-content">
+      <h2>☁️ Set Up Remote Saving?</h2>
+      <p class="modal-subtitle">Back up your writing to GitHub for free. Your token stays on this device.</p>
+
+      <div class="step-guide">
+        <p><strong>How to create a GitHub repository:</strong></p>
+        <p>1. Go to <a href="#" id="open-github-new-repo">github.com/new</a></p>
+        <p>2. Enter a name for your repository (e.g. "my-novel")</p>
+        <p>3. Keep it <strong>Private</strong> for your writing</p>
+        <p>4. Click <strong>Create repository</strong></p>
+        <p>5. Copy the URL and paste it below</p>
+      </div>
+
+      <div class="input-group">
+        <label>Repository URL</label>
+        <input type="text" id="remote-setup-url" placeholder="https://github.com/username/my-novel.git"
+          autocomplete="off">
+      </div>
+
+      <span id="remote-setup-error" class="modal-error hidden"></span>
+
+      <div class="modal-actions">
+        <button id="remote-setup-skip" class="ghost">Skip for now</button>
+        <button id="remote-setup-confirm" class="primary">Save Remote</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content settings-window">
+      <div class="settings-sidebar">
+        <h2>Settings</h2>
+        <div class="settings-nav">
+          <button class="settings-tab active" data-tab="general">General</button>
+          <button class="settings-tab" data-tab="editor">Editor</button>
+          <button class="settings-tab" data-tab="git">Sync & Backup</button>
+          <button class="settings-tab" data-tab="about">About</button>
         </div>
-        <div class="top-actions">
-          <button id="btn-new-chapter" class="ghost">New Chapter</button>
-          <button id="btn-export" class="ghost">Export</button>
+        <div class="spacer" style="flex:1"></div>
+        <button id="settings-close" class="ghost">Close</button>
+      </div>
+      <div class="settings-body">
+        <div id="settings-general" class="settings-page">
+          <h3>General</h3>
+          <div class="setting-item">
+            <label>Theme</label>
+            <select id="setting-theme">
+              <option value="system">System Default</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label>Tutorial</label>
+            <button id="btn-reset-tutorial" class="ghost small">Reset Tutorial</button>
+          </div>
         </div>
-      </header>
-      <div class="app-container">
-        <aside class="sidebar" id="sidebar">
-          <div class="sidebar-tabs">
-            <button data-tab="chapters" class="tab-button active">Chapters</button>
-            <button data-tab="characters" class="tab-button">Characters</button>
-            <button data-tab="notes" class="tab-button">Notes</button>
+        <div id="settings-editor" class="settings-page hidden">
+          <h3>Editor</h3>
+          <div class="setting-item">
+            <label>Font Family</label>
+            <select id="setting-font-family">
+              <option value="'Inter', sans-serif">Sans Serif (Inter)</option>
+              <option value="'Merriweather', serif">Serif (Merriweather)</option>
+              <option value="'Fira Code', monospace">Monospace</option>
+            </select>
           </div>
-          <div id="sidebar-content">
-            <div class="sidebar-section" data-section="chapters"></div>
-            <div class="sidebar-section hidden" data-section="characters"></div>
-            <div class="sidebar-section hidden" data-section="notes"></div>
+          <div class="setting-item">
+            <label>Font Size</label>
+            <input type="number" id="setting-font-size" value="16" min="10" max="32">
           </div>
-        </aside>
-        <section class="editor-pane">
-          <div class="editor-header">
-            <input id="entry-title" type="text" placeholder="Untitled" />
-            <div class="editor-meta" id="editor-meta">
-              <label class="font-size-control" for="font-size">
-                Font size
-                <select id="font-size">
-                  <option value="14">14</option>
-                  <option value="16" selected>16</option>
-                  <option value="18">18</option>
-                  <option value="20">20</option>
-                  <option value="22">22</option>
-                  <option value="24">24</option>
-                </select>
-              </label>
-              <div id="meta-fields"></div>
-              <span id="save-status">Saved</span>
+          <div class="setting-item">
+            <label>Line Height</label>
+            <div class="range-wrap">
+              <input type="range" id="setting-line-height" min="1.2" max="2.0" step="0.1" value="1.6">
+              <span id="val-line-height">1.6</span>
             </div>
           </div>
-          <div id="editor-container">
-            <div id="editor-toolbar">
-              <span class="ql-formats">
-                <select class="ql-header">
-                  <option selected></option>
-                  <option value="2">Heading 2</option>
-                  <option value="3">Heading 3</option>
-                </select>
-                <button class="ql-bold"></button>
-                <button class="ql-italic"></button>
-                <button class="ql-underline"></button>
-              </span>
-              <span class="ql-formats">
-                <button class="ql-list" value="ordered"></button>
-                <button class="ql-list" value="bullet"></button>
-                <button class="ql-blockquote"></button>
-                <button class="ql-code-block"></button>
-              </span>
-              <span class="ql-formats">
-                <button class="ql-link"></button>
-                <button class="ql-image"></button>
-              </span>
-            </div>
-            <div id="editor"></div>
+          <div class="setting-item">
+            <label>Page Width</label>
+            <select id="setting-page-width">
+              <option value="600px">Narrow (600px)</option>
+              <option value="800px">Medium (800px)</option>
+              <option value="1000px">Wide (1000px)</option>
+              <option value="100%">Full Width</option>
+            </select>
           </div>
-        </section>
+          <div class="setting-item">
+            <label class="checkbox-row">
+              <input type="checkbox" id="setting-indent">
+              <span>Indent First Line</span>
+            </label>
+          </div>
+        </div>
+        <div id="settings-git" class="settings-page hidden">
+          <h3>Sync & Backup</h3>
+          <div class="setting-card" id="git-status-card">
+            <p>Status: <span id="git-status-text">Not configured</span></p>
+            <p style="font-size: 0.9em; opacity: 0.7; margin-top: 5px; word-break: break-all;">Remote: <span
+                id="setting-remote-url">Checking...</span></p>
+            <button id="btn-force-sync" class="ghost small">Sync Now</button>
+          </div>
+          <div class="setting-item">
+            <label class="checkbox-row">
+              <input type="checkbox" id="setting-autosync">
+              <span>Enable Auto-sync</span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label for="setting-autosync-interval">Interval (minutes)</label>
+            <input type="number" id="setting-autosync-interval" value="30" min="5" style="width: 80px;">
+          </div>
+          <div class="setting-actions">
+            <button id="btn-reconfigure-git" class="ghost small">Reconfigure Git</button>
+          </div>
+        </div>
+        <div id="settings-about" class="settings-page hidden">
+          <div class="about-hero">
+            <div class="app-logo">N</div>
+            <h4>Novelist v1.0.1</h4>
+            <p>A distraction-free writing environment for authors.</p>
+          </div>
+
+          <div class="about-section">
+            <h4>Keyboard Shortcuts</h4>
+            <div class="shortcuts-grid">
+              <div class="shortcut-item"><span>Save</span> <code>Cmd+S</code></div>
+              <div class="shortcut-item"><span>Settings</span> <code>Cmd+,</code></div>
+              <div class="shortcut-item"><span>Push (Sync)</span> <code>Cmd+Alt+P</code></div>
+              <div class="shortcut-item"><span>Pull</span> <code>Cmd+Alt+L</code></div>
+              <div class="shortcut-item"><span>Search</span> <code>Cmd+F</code></div>
+              <div class="shortcut-item"><span>Toggle Sidebar</span> <code>Cmd+B</code></div>
+              <div class="shortcut-item"><span>New Chapter</span> <code>Cmd+N</code></div>
+            </div>
+          </div>
+
+          <div class="about-footer">
+            <p>Created by Congrow. Built with Electron.</p>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div id="toast" class="toast hidden"></div>
+  <div id="app" class="hidden">
+    <header class="top-bar">
+      <div class="project-info">
+        <span id="project-name">Untitled Project</span>
+      </div>
+      <div class="top-actions">
+        <button id="btn-new-chapter" class="ghost">New Chapter</button>
+        <button id="btn-export" class="ghost">Export</button>
+      </div>
+    </header>
+    <div class="app-container">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-tabs">
+          <button data-tab="chapters" class="tab-button active">Chapters</button>
+          <button data-tab="characters" class="tab-button">Characters</button>
+          <button data-tab="notes" class="tab-button">Notes</button>
+        </div>
+        <div id="sidebar-content">
+          <div class="sidebar-section" data-section="chapters"></div>
+          <div class="sidebar-section hidden" data-section="characters"></div>
+          <div class="sidebar-section hidden" data-section="notes"></div>
+        </div>
+      </aside>
+      <section class="editor-pane">
+        <div class="editor-header">
+          <input id="entry-title" type="text" placeholder="Untitled" />
+          <div class="editor-meta" id="editor-meta">
+            <label class="font-size-control" for="font-size">
+              Font size
+              <select id="font-size">
+                <option value="14">14</option>
+                <option value="16" selected>16</option>
+                <option value="18">18</option>
+                <option value="20">20</option>
+                <option value="22">22</option>
+                <option value="24">24</option>
+              </select>
+            </label>
+            <div id="meta-fields"></div>
+            <span id="save-status">Saved</span>
+          </div>
+        </div>
+        <div id="editor-container">
+          <div id="editor-toolbar">
+            <span class="ql-formats">
+              <select class="ql-header">
+                <option selected></option>
+                <option value="2">Heading 2</option>
+                <option value="3">Heading 3</option>
+              </select>
+              <button class="ql-bold"></button>
+              <button class="ql-italic"></button>
+              <button class="ql-underline"></button>
+            </span>
+            <span class="ql-formats">
+              <button class="ql-list" value="ordered"></button>
+              <button class="ql-list" value="bullet"></button>
+              <button class="ql-blockquote"></button>
+              <button class="ql-code-block"></button>
+            </span>
+            <span class="ql-formats">
+              <button class="ql-link"></button>
+              <button class="ql-image"></button>
+            </span>
+          </div>
+          <div id="search-bar" class="search-bar hidden">
+            <input type="text" id="find-input" placeholder="Find">
+            <div id="replace-controls" class="replace-controls hidden" style="display:contents">
+              <input type="text" id="replace-input" placeholder="Replace">
+              <button id="btn-replace" class="ghost small">Replace</button>
+              <button id="btn-replace-all" class="ghost small">All</button>
+            </div>
+            <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 4px;"></div>
+            <button id="btn-find-prev" class="ghost icon-btn" title="Previous">▲</button>
+            <button id="btn-find-next" class="ghost icon-btn" title="Next">▼</button>
+            <button id="btn-toggle-replace" class="ghost icon-btn" title="Toggle Replace">≡</button>
+            <button id="btn-search-close" class="ghost icon-btn" title="Close">✕</button>
+          </div>
+          <div id="editor"></div>
+        </div>
+      </section>
+    </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
-    <script src="../node_modules/marked/marked.min.js"></script>
-    <script src="../node_modules/turndown/dist/turndown.min.js"></script>
-    <script src="./app.js"></script>
-  </body>
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+  <script src="../node_modules/marked/marked.min.js"></script>
+  <script src="../node_modules/turndown/dist/turndown.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+
 </html>

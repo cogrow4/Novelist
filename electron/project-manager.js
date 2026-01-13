@@ -16,6 +16,12 @@ const defaultProjectFile = (name, id) => ({
   lastNoteId: null
 });
 
+const defaultOrderFile = {
+  chapters: [],
+  scenes: {},
+  notes: []
+};
+
 const ensureBaseDirectory = async () => {
   await fs.ensureDir(NOVELIST_ROOT);
 };
@@ -63,6 +69,7 @@ const checkAndCreateProject = async (name) => {
   await ensureProjectStructure(projectPath);
   const metadata = defaultProjectFile(name.trim(), projectId);
   await fs.writeJson(join(projectPath, 'project.json'), metadata, { spaces: 2 });
+  await fs.writeJson(join(projectPath, 'order.json'), defaultOrderFile, { spaces: 2 });
 
   const chapterId = await createChapter(projectPath, 'Chapter 1');
   await saveChapter(projectPath, chapterId.id, {
@@ -128,7 +135,23 @@ const listChapters = async (projectPath) => {
       scenes
     });
   }
-  return chapters.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+  const order = await loadOrderFile(projectPath);
+
+  // Sort based on order file
+  chapters.sort((a, b) => {
+    const indexA = order.chapters.indexOf(a.id);
+    const indexB = order.chapters.indexOf(b.id);
+    // If both are in the list, sort by index
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    // If a is in list but b isn't, a comes first
+    if (indexA !== -1) return -1;
+    // If b is in list but a isn't, b comes first
+    if (indexB !== -1) return 1;
+    // Otherwise alphabetical fallback
+    return a.title.localeCompare(b.title, undefined, { numeric: true });
+  });
+
+  return chapters;
 };
 
 const parseChapterTitle = (content) => {
@@ -153,7 +176,19 @@ const listScenes = async (scenesDir) => {
       path: filePath
     });
   }
-  return items.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+  const projectPath = join(scenesDir, '../..'); // Go up from chapter-scenes -> chapters -> project
+  const chapterId = basename(scenesDir).replace('-scenes', '');
+  const order = await loadOrderFile(projectPath);
+  const sceneOrder = order.scenes[chapterId] || [];
+
+  return items.sort((a, b) => {
+    const indexA = sceneOrder.indexOf(a.id);
+    const indexB = sceneOrder.indexOf(b.id);
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    return a.title.localeCompare(b.title, undefined, { numeric: true });
+  });
 };
 
 const parseSceneTitle = (content) => {
@@ -168,6 +203,14 @@ const createChapter = async (projectPath, title) => {
   const chapterPath = join(chaptersDir, `${chapterId}.md`);
   const template = `# ${title}\n\nBegin writing your chapter...`;
   await fs.writeFile(chapterPath, template, 'utf-8');
+
+  // Update order
+  const order = await loadOrderFile(projectPath);
+  if (!order.chapters.includes(chapterId)) {
+    order.chapters.push(chapterId);
+    await saveOrderFile(projectPath, order);
+  }
+
   return { id: chapterId, path: chapterPath };
 };
 
@@ -192,6 +235,15 @@ const createScene = async (projectPath, chapterId, sceneName) => {
   const scenePath = join(scenesDir, `${sceneId}.md`);
   const template = `## ${sceneName}\n\nDescribe the scene...`;
   await fs.writeFile(scenePath, template, 'utf-8');
+
+  // Update order
+  const order = await loadOrderFile(projectPath);
+  if (!order.scenes[chapterId]) order.scenes[chapterId] = [];
+  if (!order.scenes[chapterId].includes(sceneId)) {
+    order.scenes[chapterId].push(sceneId);
+    await saveOrderFile(projectPath, order);
+  }
+
   return { id: sceneId, path: scenePath };
 };
 
@@ -217,6 +269,14 @@ const deleteChapter = async (projectPath, chapterId) => {
   await fs.remove(chapterPath);
   // Remove associated scenes directory if present
   await fs.remove(scenesDir);
+  await fs.remove(scenesDir);
+
+  // Update order
+  const order = await loadOrderFile(projectPath);
+  order.chapters = order.chapters.filter(id => id !== chapterId);
+  delete order.scenes[chapterId];
+  await saveOrderFile(projectPath, order);
+
   await writeProjectFile(projectPath, await loadProjectFile(projectPath));
   return true;
 };
@@ -226,6 +286,14 @@ const deleteScene = async (projectPath, chapterId, sceneId) => {
   if (!sceneId) throw new Error('sceneId is required');
   const scenePath = join(projectPath, 'chapters', `${chapterId}-scenes`, `${sceneId}.md`);
   await fs.remove(scenePath);
+
+  // Update order
+  const order = await loadOrderFile(projectPath);
+  if (order.scenes[chapterId]) {
+    order.scenes[chapterId] = order.scenes[chapterId].filter(id => id !== sceneId);
+    await saveOrderFile(projectPath, order);
+  }
+
   return true;
 };
 
@@ -292,7 +360,16 @@ const listNotes = async (projectPath) => {
       path: filePath
     });
   }
-  return notes.sort((a, b) => a.title.localeCompare(b.title));
+  const order = await loadOrderFile(projectPath);
+
+  return notes.sort((a, b) => {
+    const indexA = order.notes.indexOf(a.id);
+    const indexB = order.notes.indexOf(b.id);
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    return a.title.localeCompare(b.title);
+  });
 };
 
 const parseNoteTitle = (content) => {
@@ -312,6 +389,14 @@ const saveNote = async (projectPath, noteId, payload) => {
   let content = `# ${title}\n\nCategory: ${category}\n\n${body}`.trimEnd();
   content += '\n';
   await fs.writeFile(filePath, content, 'utf-8');
+
+  // Update order
+  const order = await loadOrderFile(projectPath);
+  if (!order.notes.includes(id)) {
+    order.notes.push(id);
+    await saveOrderFile(projectPath, order);
+  }
+
   return { id, path: filePath, category };
 };
 
@@ -319,6 +404,12 @@ const deleteNote = async (projectPath, noteId) => {
   if (!noteId) throw new Error('noteId is required');
   const filePath = join(projectPath, 'notes', `${noteId}.md`);
   await fs.remove(filePath);
+
+  // Update order
+  const order = await loadOrderFile(projectPath);
+  order.notes = order.notes.filter(id => id !== noteId);
+  await saveOrderFile(projectPath, order);
+
   return true;
 };
 
@@ -371,7 +462,26 @@ const pushToRemote = async (projectPath) => {
   const git = simpleGit(projectPath);
   const isRepo = await git.checkIsRepo();
   if (!isRepo) throw new Error('Project is not a Git repository yet');
-  await git.push();
+
+  // Auto-commit if there are changes (Sync behavior)
+  const status = await git.status();
+  if (status.files.length > 0) {
+    await git.add('./*');
+    await git.commit(`Manual sync: ${new Date().toLocaleString()}`);
+  }
+
+  try {
+    await git.push();
+  } catch (e) {
+    // If push fails due to missing upstream, set it and try again
+    if (e.message.includes('no upstream branch') || e.message.includes('current branch') && e.message.includes('no upstream')) {
+      const branch = await git.revparse(['--abbrev-ref', 'HEAD']);
+      console.log(`Setting upstream for branch ${branch} and pushing...`);
+      await git.push(['--set-upstream', 'origin', branch]);
+    } else {
+      throw e;
+    }
+  }
   return true;
 };
 
@@ -398,6 +508,119 @@ const setGitRemote = async (projectPath, remoteUrl) => {
   return true;
 };
 
+// --- Order Management ---
+const loadOrderFile = async (projectPath) => {
+  const orderPath = join(projectPath, 'order.json');
+  if (!(await fs.pathExists(orderPath))) {
+    return { ...defaultOrderFile };
+  }
+  return await fs.readJson(orderPath);
+};
+
+const saveOrderFile = async (projectPath, order) => {
+  const orderPath = join(projectPath, 'order.json');
+  await fs.writeJson(orderPath, order, { spaces: 2 });
+};
+
+const reorderChapters = async (projectPath, chapterIds) => {
+  const order = await loadOrderFile(projectPath);
+  order.chapters = chapterIds;
+  await saveOrderFile(projectPath, order);
+  return true;
+};
+
+const reorderScenes = async (projectPath, chapterId, sceneIds) => {
+  const order = await loadOrderFile(projectPath);
+  order.scenes[chapterId] = sceneIds;
+  await saveOrderFile(projectPath, order);
+  return true;
+};
+
+const reorderNotes = async (projectPath, noteIds) => {
+  const order = await loadOrderFile(projectPath);
+  order.notes = noteIds;
+  await saveOrderFile(projectPath, order);
+  return true;
+};
+
+// --- Advanced Git Operations ---
+
+const checkGitInstalled = async () => {
+  try {
+    const git = simpleGit();
+    const version = await git.version();
+    return !!version.installed;
+  } catch (e) {
+    return false;
+  }
+};
+
+const cloneProject = async (remoteUrl, targetName) => {
+  await ensureBaseDirectory();
+  const name = targetName || basename(remoteUrl, '.git');
+  const projectPath = join(NOVELIST_ROOT, name);
+
+  if (await fs.pathExists(projectPath)) {
+    throw new Error('Directory already exists');
+  }
+
+  const git = simpleGit();
+  await git.clone(remoteUrl, projectPath);
+
+  // Ensure structure exists after clone (in case it's a raw repo)
+  await ensureProjectStructure(projectPath);
+  return loadProject(projectPath);
+};
+
+const configureGitUser = async (projectPath, username, email) => {
+  const git = simpleGit(projectPath);
+  await git.addConfig('user.name', username);
+  await git.addConfig('user.email', email);
+};
+
+const autoSync = async (projectPath) => {
+  const git = simpleGit(projectPath);
+  const isRepo = await git.checkIsRepo();
+  if (!isRepo) return false;
+
+  const status = await git.status();
+  if (status.files.length > 0) {
+    await git.add('./*');
+    await git.commit(`Auto-save: ${new Date().toLocaleString()}`);
+    try {
+      await git.push();
+    } catch (e) {
+      if (e.message.includes('no upstream branch') || e.message.includes('current branch') && e.message.includes('no upstream')) {
+        const branch = await git.revparse(['--abbrev-ref', 'HEAD']);
+        await git.push(['--set-upstream', 'origin', branch]);
+      } else {
+        console.error('Auto-sync push failed:', e);
+      }
+    }
+    return true; // Synced
+  }
+  return false; // Nothing to sync
+};
+
+const getGitStatus = async (projectPath) => {
+  const git = simpleGit(projectPath);
+  const isRepo = await git.checkIsRepo();
+  if (!isRepo) return { isRepo: false };
+
+  try {
+    const status = await git.status();
+    const remotes = await git.getRemotes(true);
+    return {
+      isRepo: true,
+      hasChanges: status.files.length > 0,
+      hasRemote: remotes.length > 0,
+      remoteUrl: remotes.find(r => r.name === 'origin')?.refs?.fetch || (remotes[0]?.refs?.fetch || '')
+    };
+  } catch (e) {
+    return { isRepo: false, error: e.message };
+  }
+};
+
 export {
   NOVELIST_ROOT,
   ensureProjectStructure,
@@ -422,5 +645,13 @@ export {
   commitCurrentChanges,
   pushToRemote,
   pullFromRemote,
-  setGitRemote
+  setGitRemote,
+  reorderChapters,
+  reorderScenes,
+  reorderNotes,
+  checkGitInstalled,
+  cloneProject,
+  configureGitUser,
+  autoSync,
+  getGitStatus
 };

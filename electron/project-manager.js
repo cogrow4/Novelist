@@ -107,6 +107,39 @@ const listProjects = async () => {
   return projects.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 };
 
+const getProjectsGitStatus = async () => {
+  await ensureBaseDirectory();
+  const dirs = await fs.readdir(NOVELIST_ROOT);
+  const projects = [];
+
+  for (const folder of dirs) {
+    const projectPath = join(NOVELIST_ROOT, folder);
+    // basic check if valid project
+    if (await fs.pathExists(join(projectPath, 'project.json'))) {
+      const git = simpleGit(projectPath);
+      let isRepo = false;
+      let remoteUrl = '';
+      try {
+        isRepo = await git.checkIsRepo();
+        if (isRepo) {
+          const remotes = await git.getRemotes(true);
+          remoteUrl = remotes.find(r => r.name === 'origin')?.refs?.fetch || (remotes[0]?.refs?.fetch || '');
+        }
+      } catch (e) {
+        // ignore git errors
+      }
+
+      projects.push({
+        name: folder,
+        path: projectPath,
+        isRepo,
+        remoteUrl
+      });
+    }
+  }
+  return projects;
+};
+
 const loadProject = async (projectPath) => {
   await ensureProjectStructure(projectPath);
   const metadata = await loadProjectFile(projectPath);
@@ -746,6 +779,9 @@ export {
   checkGitInstalled,
   cloneProject,
   configureGitUser,
+  cloneProject,
+  configureGitUser,
   autoSync,
-  getGitStatus
+  getGitStatus,
+  getProjectsGitStatus
 };

@@ -163,6 +163,86 @@ main#welcome-screen {
   padding: 0;
   max-height: 220px;
   overflow: auto;
+  white-space: nowrap;
+}
+
+/* Settings Table */
+.table-container {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.settings-table th,
+.settings-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-table th {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.settings-table tr:last-child td {
+  border-bottom: none;
+}
+
+.settings-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.settings-table td.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.settings-table .repo-link {
+  color: var(--accent);
+  text-decoration: none;
+  max-width: 200px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.settings-table .repo-link:hover {
+  text-decoration: underline;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.input-with-button input {
+  flex: 1;
+}
+
+.setting-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.setting-separator {
+  height: 1px;
+  background: var(--border-color);
+  margin: 20px 0;
 }
 
 .project-list li {

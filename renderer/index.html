@@ -256,6 +256,38 @@
           <div class="setting-actions">
             <button id="btn-reconfigure-git" class="ghost small">Reconfigure Git</button>
           </div>
+
+          <div class="setting-separator"></div>
+
+          <div class="setting-item">
+            <label>GitHub Token</label>
+            <div class="input-with-button">
+              <input type="password" id="setting-git-token" placeholder="ghp_..." autocomplete="off">
+              <button id="btn-toggle-token" class="ghost icon-only" title="Show/Hide">Show</button>
+            </div>
+            <p class="setting-desc">Personal Access Token for authentication</p>
+          </div>
+
+          <div class="setting-separator"></div>
+
+          <h3>Projects & Repositories</h3>
+          <div class="table-container">
+            <table class="settings-table" id="projects-git-table">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Repository</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="3" class="empty-state">Loading projects...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button id="btn-refresh-git-projects" class="ghost small" style="margin-top: 8px;">Refresh List</button>
         </div>
         <div id="settings-about" class="settings-page hidden">
           <div class="about-hero">

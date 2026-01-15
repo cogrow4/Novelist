@@ -333,12 +333,16 @@ ipcMain.handle('git:auto-sync', async (_event, projectPath) => {
   return autoSync(projectPath);
 });
 
+ipcMain.handle('git:list-projects', async () => {
+  return getProjectsGitStatus();
+});
+
 ipcMain.handle('git:status', async (_event, projectPath) => {
   return getGitStatus(projectPath);
 });
 
-ipcMain.handle('preferences:get', () => {
-  return store.store;
+ipcMain.handle('preferences:get', async () => {
+  return store.get('preferences') || {};
 });
 
 ipcMain.handle('preferences:set', (_event, values) => {

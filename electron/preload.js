@@ -43,8 +43,10 @@ contextBridge.exposeInMainWorld('novelist', {
     setRemote: (projectPath, remoteUrl) => invoke('git:set-remote', projectPath, remoteUrl),
     checkInstalled: () => invoke('git:check-installed'),
     configureUser: (projectPath, username, email) => invoke('git:configure-user', projectPath, username, email),
+    configureUser: (projectPath, username, email) => invoke('git:configure-user', projectPath, username, email),
     autoSync: (projectPath) => invoke('git:auto-sync', projectPath),
-    status: (projectPath) => invoke('git:status', projectPath)
+    status: (projectPath) => invoke('git:status', projectPath),
+    getAllStatus: () => invoke('git:list-projects')
   },
   preferences: {
     get: () => invoke('preferences:get'),

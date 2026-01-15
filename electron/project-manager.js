@@ -3,6 +3,13 @@ import { join, basename } from 'path';
 import os from 'os';
 import { nanoid } from 'nanoid';
 import simpleGit from 'simple-git';
+import { dialog } from 'electron';
+import TurndownService from 'turndown';
+
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  codeBlockStyle: 'fenced'
+});
 
 const NOVELIST_ROOT = join(os.homedir(), 'Documents', 'Novelist');
 
@@ -269,7 +276,6 @@ const deleteChapter = async (projectPath, chapterId) => {
   await fs.remove(chapterPath);
   // Remove associated scenes directory if present
   await fs.remove(scenesDir);
-  await fs.remove(scenesDir);
 
   // Update order
   const order = await loadOrderFile(projectPath);
@@ -420,22 +426,110 @@ const parseNoteCategory = (content) => {
 
 const exportProject = async (projectPath) => {
   await ensureProjectStructure(projectPath);
+
+  // Ask user where to save
+  const { filePath } = await dialog.showSaveDialog({
+    title: 'Export Project',
+    defaultPath: join(os.homedir(), `Export-${basename(projectPath)}-${new Date().toISOString().split('T')[0]}.md`),
+    filters: [
+      { name: 'Markdown', extensions: ['md'] },
+      { name: 'Plain Text', extensions: ['txt'] }
+    ]
+  });
+
+  if (!filePath) {
+    throw new Error('Export cancelled');
+  }
+
   const chapters = await listChapters(projectPath);
+  const characters = await listCharacters(projectPath);
+  const notes = await listNotes(projectPath);
+
   const lines = [];
-  lines.push(`# ${basename(projectPath)}`);
+  const projectName = basename(projectPath);
+
+  // Title
+  lines.push(`# ${projectName}`);
   lines.push('');
+  lines.push(`_Exported on ${new Date().toLocaleString()}_`);
+  lines.push('');
+
+  // Table of Contents
+  lines.push('## Table of Contents');
+  lines.push('');
+  chapters.forEach(ch => {
+    lines.push(`- [${ch.title}](#${ch.title.toLowerCase().replace(/[^\w]+/g, '-')})`);
+  });
+  if (characters.length > 0) lines.push('- [Appendix: Characters](#appendix-characters)');
+  if (notes.length > 0) lines.push('- [Appendix: Notes](#appendix-notes)');
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+
+  // Helper to process content (remove HTML markers, convert to MD if needed)
+  const processContent = (content) => {
+    if (!content) return '';
+    let body = content;
+    // Remove title lines
+    body = body.replace(/^#+\s+.*$/m, '').trim();
+    // Remove category lines
+    body = body.replace(/^Category:\s*.*$/m, '').trim();
+
+    // Check for HTML body
+    if (body.includes('<!-- HTML_BODY -->') || (body.includes('<') && body.includes('</'))) {
+      body = body.replace('<!-- HTML_BODY -->', '').trim();
+      // Convert HTML to Markdown
+      return turndownService.turndown(body);
+    }
+    return body;
+  };
+
+  // Content
   for (const chapter of chapters) {
-    lines.push(chapter.content.trim());
+    lines.push(`# ${chapter.title}`);
     lines.push('');
+    lines.push(processContent(chapter.content));
+    lines.push('');
+
     for (const scene of chapter.scenes) {
-      lines.push(scene.content.trim());
+      lines.push(`## ${scene.title}`);
+      lines.push('');
+      lines.push(processContent(scene.content));
+      lines.push('');
+    }
+    lines.push('---');
+    lines.push('');
+  }
+
+  // Appendices
+  if (characters.length > 0) {
+    lines.push('# Appendix: Characters');
+    lines.push('');
+    for (const char of characters) {
+      lines.push(`## ${char.name}`);
+      lines.push('');
+      lines.push(processContent(char.content));
+      lines.push('');
+    }
+    lines.push('---');
+    lines.push('');
+  }
+
+  if (notes.length > 0) {
+    lines.push('# Appendix: Notes');
+    lines.push('');
+    for (const note of notes) {
+      lines.push(`## ${note.title}`);
+      lines.push(`**Category:** ${note.category || 'General'}`);
+      lines.push('');
+      lines.push(processContent(note.content));
       lines.push('');
     }
   }
+
   const exportContent = lines.join('\n');
-  const exportPath = join(projectPath, `${basename(projectPath)}-export.md`);
-  await fs.writeFile(exportPath, exportContent, 'utf-8');
-  return exportPath;
+  await fs.writeFile(filePath, exportContent, 'utf-8');
+  return filePath;
 };
 
 const initGitRepo = async (projectPath) => {

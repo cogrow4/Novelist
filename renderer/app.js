@@ -302,8 +302,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     chaptersSection: document.querySelector('.sidebar-section[data-section="chapters"]'),
     charactersSection: document.querySelector('.sidebar-section[data-section="characters"]'),
     notesSection: document.querySelector('.sidebar-section[data-section="notes"]'),
-    btnNewChapter: document.getElementById('btn-new-chapter'),
-    btnExport: document.getElementById('btn-export'),
     tutorialOverlay: document.getElementById('tutorial-overlay'),
     tutorialSteps: document.getElementById('tutorial-steps'),
     tutorialPrev: document.getElementById('tutorial-prev'),
@@ -646,26 +644,36 @@ function scheduleAutoSave() {
   }, 2000);
 }
 
+// HTML body marker to distinguish from legacy markdown content
+const HTML_BODY_MARKER = '<!-- HTML_BODY -->';
+
+function isHtmlContent(content) {
+  // Check if content was saved with HTML body marker or looks like HTML
+  return content.includes(HTML_BODY_MARKER) ||
+    (content.includes('<') && content.includes('</'));
+}
+
 function buildChapterMarkdown(title, body) {
   const cleanBody = body.trim();
-  return cleanBody ? `# ${title}\n\n${cleanBody}` : `# ${title}`;
+  // Store body as HTML with marker for preservation
+  return cleanBody ? `# ${title}\n\n${HTML_BODY_MARKER}\n${cleanBody}` : `# ${title}`;
 }
 
 function buildSceneMarkdown(title, body) {
   const cleanBody = body.trim();
-  return cleanBody ? `## ${title}\n\n${cleanBody}` : `## ${title}`;
+  return cleanBody ? `## ${title}\n\n${HTML_BODY_MARKER}\n${cleanBody}` : `## ${title}`;
 }
 
 function buildCharacterMarkdown(title, body) {
   const cleanBody = body.trim();
-  const placeholder = cleanBody || `- Background\n- Goals\n- Conflicts`;
-  return `# ${title}\n\n${placeholder}`;
+  const placeholder = cleanBody || `<p>- Background</p><p>- Goals</p><p>- Conflicts</p>`;
+  return `# ${title}\n\n${HTML_BODY_MARKER}\n${placeholder}`;
 }
 
 function buildNoteMarkdown(title, category, body) {
   const cleanBody = body.trim();
   if (cleanBody) {
-    return `# ${title}\n\nCategory: ${category}\n\n${cleanBody}`;
+    return `# ${title}\n\nCategory: ${category}\n\n${HTML_BODY_MARKER}\n${cleanBody}`;
   }
   return `# ${title}\n\nCategory: ${category}`;
 }
@@ -673,22 +681,26 @@ function buildNoteMarkdown(title, category, body) {
 function parseChapterContent(content) {
   const titleMatch = content.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1].trim() : 'Untitled Chapter';
-  const body = content.replace(/^#\s+.*$/m, '').trim();
-  return { title, body };
+  let body = content.replace(/^#\s+.*$/m, '').trim();
+  // Remove HTML body marker if present
+  body = body.replace(/^<!-- HTML_BODY -->\n?/, '').trim();
+  return { title, body, isHtml: isHtmlContent(content) };
 }
 
 function parseSceneContent(content) {
   const titleMatch = content.match(/^##\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1].trim() : 'Scene';
-  const body = content.replace(/^##\s+.*$/m, '').trim();
-  return { title, body };
+  let body = content.replace(/^##\s+.*$/m, '').trim();
+  body = body.replace(/^<!-- HTML_BODY -->\n?/, '').trim();
+  return { title, body, isHtml: isHtmlContent(content) };
 }
 
 function parseCharacterContent(content) {
   const titleMatch = content.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1].trim() : 'Character';
-  const body = content.replace(/^#\s+.*$/m, '').trim();
-  return { title, body };
+  let body = content.replace(/^#\s+.*$/m, '').trim();
+  body = body.replace(/^<!-- HTML_BODY -->\n?/, '').trim();
+  return { title, body, isHtml: isHtmlContent(content) };
 }
 
 function parseNoteContent(content) {
@@ -696,16 +708,26 @@ function parseNoteContent(content) {
   const categoryMatch = content.match(/^Category:\s*(.+)$/m);
   const title = titleMatch ? titleMatch[1].trim() : 'Story Note';
   const category = categoryMatch ? categoryMatch[1].trim() : 'General';
-  const body = content
+  let body = content
     .replace(/^#\s+.*$/m, '')
     .replace(/^Category:\s*.*$/m, '')
     .trim();
-  return { title, category, body };
+  body = body.replace(/^<!-- HTML_BODY -->\n?/, '').trim();
+  return { title, category, body, isHtml: isHtmlContent(content) };
 }
 
-function setEditorContent(markdownBody) {
+function setEditorContent(body, isHtml = false) {
   state.suppressEditorChange = true;
-  const html = markdownBody ? markedInstance.parse(markdownBody) : '<p><br></p>';
+  let html;
+  if (!body) {
+    html = '<p><br></p>';
+  } else if (isHtml) {
+    // Content is already HTML - use directly
+    html = body;
+  } else {
+    // Legacy markdown content - convert to HTML
+    html = markedInstance.parse(body);
+  }
   quill.setContents([]);
   quill.clipboard.dangerouslyPasteHTML(html);
   quill.setSelection(quill.getLength(), 0);
@@ -725,26 +747,8 @@ function renderMetaFieldsForEntry(entry) {
   ui.metaFields.innerHTML = '';
   if (!entry) return;
 
-  if (entry.type === 'note') {
-    const label = document.createElement('label');
-    label.className = 'meta-field';
-    label.textContent = 'Category';
-
-    const select = document.createElement('select');
-    NOTE_CATEGORIES.forEach((cat) => {
-      const option = document.createElement('option');
-      option.value = cat;
-      option.textContent = cat;
-      if (cat === entry.category) option.selected = true;
-      select.appendChild(option);
-    });
-    select.addEventListener('change', () => {
-      entry.category = select.value;
-      markDirty();
-    });
-    label.appendChild(select);
-    ui.metaFields.appendChild(label);
-  }
+  // Category dropdown removed from editor meta area per user request
+  // Categories are shown in sidebar grouping and selected during note creation
 
   const tip = document.createElement('span');
   tip.className = 'meta-tip';
@@ -760,6 +764,135 @@ function renderMetaFieldsForEntry(entry) {
   ui.metaFields.appendChild(tip);
 }
 
+// Get all unique categories from existing notes plus defaults
+function getAvailableCategories() {
+  const defaultCats = new Set(NOTE_CATEGORIES);
+  const noteCats = state.project?.notes?.map(n => n.category) || [];
+  noteCats.forEach(cat => defaultCats.add(cat));
+  return Array.from(defaultCats).filter(Boolean).sort();
+}
+
+// Show category selection modal with add/delete capability
+function showCategorySelect(currentCategory = 'General') {
+  return new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'category-select-modal';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content';
+
+    const title = document.createElement('h2');
+    title.textContent = 'Select Category';
+    content.appendChild(title);
+
+    const categories = getAvailableCategories();
+    const listContainer = document.createElement('div');
+    listContainer.className = 'category-list';
+    listContainer.style.cssText = 'max-height: 200px; overflow-y: auto; margin-bottom: 16px;';
+
+    function renderList() {
+      listContainer.innerHTML = '';
+      const currentCats = getAvailableCategories();
+      currentCats.forEach(cat => {
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(255,255,255,0.04); border-radius: 8px; margin-bottom: 6px; cursor: pointer;';
+        if (cat === currentCategory) {
+          item.style.background = 'rgba(76, 141, 255, 0.1)';
+          item.style.border = '1px solid rgba(76, 141, 255, 0.4)';
+        }
+
+        const label = document.createElement('span');
+        label.textContent = cat;
+        label.style.flex = '1';
+
+        item.appendChild(label);
+
+        // Don't allow deleting default categories or categories in use
+        const notesUsingCat = state.project?.notes?.filter(n => n.category === cat).length || 0;
+        if (!NOTE_CATEGORIES.includes(cat) && notesUsingCat === 0) {
+          const delBtn = document.createElement('button');
+          delBtn.className = 'ghost icon-bin';
+          delBtn.textContent = '🗑️';
+          delBtn.title = 'Delete category';
+          delBtn.style.cssText = 'padding: 4px 8px; font-size: 12px;';
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Category is custom and unused - just re-render without it
+            renderList();
+          });
+          item.appendChild(delBtn);
+        } else if (notesUsingCat > 0 && !NOTE_CATEGORIES.includes(cat)) {
+          const badge = document.createElement('span');
+          badge.textContent = `${notesUsingCat} note${notesUsingCat > 1 ? 's' : ''}`;
+          badge.style.cssText = 'font-size: 11px; color: var(--text-muted);';
+          item.appendChild(badge);
+        }
+
+        item.addEventListener('click', () => {
+          cleanup();
+          resolve(cat);
+        });
+        listContainer.appendChild(item);
+      });
+    }
+
+    renderList();
+    content.appendChild(listContainer);
+
+    // Add new category button
+    const addBtn = document.createElement('button');
+    addBtn.className = 'ghost';
+    addBtn.textContent = '+ New Category';
+    addBtn.style.marginBottom = '16px';
+    addBtn.addEventListener('click', async () => {
+      const newCat = await promptInput({ title: 'New category name', placeholder: 'Category name' });
+      if (newCat && newCat.trim()) {
+        cleanup();
+        resolve(newCat.trim());
+      }
+    });
+    content.appendChild(addBtn);
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'ghost';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.addEventListener('click', () => {
+      cleanup();
+      resolve(null);
+    });
+    actions.appendChild(cancelBtn);
+    content.appendChild(actions);
+
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    function cleanup() {
+      modal.remove();
+    }
+
+    // Close on escape
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        cleanup();
+        resolve(null);
+        document.removeEventListener('keydown', onKey);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+  });
+}
+
+function getQuillHtmlBody() {
+  // Return raw HTML to preserve formatting
+  return quill.root.innerHTML;
+}
+
+// Legacy function kept for backwards compatibility
 function getQuillMarkdownBody() {
   const html = quill.root.innerHTML;
   return turndownInstance.turndown(html).trim();
@@ -769,11 +902,12 @@ async function performSave() {
   if (!state.currentEntry) return;
   const entry = state.currentEntry;
   const title = ui.entryTitle.value.trim() || entry.fallbackTitle;
-  const bodyMarkdown = getQuillMarkdownBody();
+  // Use HTML body to preserve formatting
+  const bodyHtml = getQuillHtmlBody();
   let markdown;
   try {
     if (entry.type === 'chapter') {
-      markdown = buildChapterMarkdown(title, bodyMarkdown);
+      markdown = buildChapterMarkdown(title, bodyHtml);
       await window.novelist.chapters.save(state.project.path, entry.id, {
         title,
         content: markdown
@@ -782,7 +916,7 @@ async function performSave() {
       entry.dataRef.content = markdown;
       updateTotalWordCount();
     } else if (entry.type === 'scene') {
-      markdown = buildSceneMarkdown(title, bodyMarkdown);
+      markdown = buildSceneMarkdown(title, bodyHtml);
       await window.novelist.chapters.saveScene(state.project.path, entry.chapterId, entry.id, {
         title,
         content: markdown
@@ -790,7 +924,7 @@ async function performSave() {
       entry.dataRef.title = title;
       entry.dataRef.content = markdown;
     } else if (entry.type === 'character') {
-      markdown = buildCharacterMarkdown(title, bodyMarkdown);
+      markdown = buildCharacterMarkdown(title, bodyHtml);
       const result = await window.novelist.characters.save(state.project.path, entry.id, {
         title,
         content: markdown
@@ -800,7 +934,7 @@ async function performSave() {
       entry.dataRef.content = markdown;
     } else if (entry.type === 'note') {
       const category = entry.category || 'General';
-      markdown = buildNoteMarkdown(title, category, bodyMarkdown);
+      markdown = buildNoteMarkdown(title, category, bodyHtml);
       const result = await window.novelist.notes.save(state.project.path, entry.id, {
         title,
         category,
@@ -1011,6 +1145,11 @@ function renderCharacters() {
     item.className = 'sidebar-item';
     item.dataset.entryType = 'character';
     item.dataset.entryId = character.id;
+
+    // Use row wrapper for proper delete button positioning
+    const row = document.createElement('div');
+    row.className = 'row';
+
     const strong = document.createElement('strong');
     strong.textContent = character.name;
     const meta = document.createElement('span');
@@ -1038,9 +1177,10 @@ function renderCharacters() {
         showToast(`Could not delete character: ${err.message}`, { type: 'error' });
       }
     });
-    item.appendChild(strong);
-    item.appendChild(meta);
-    item.appendChild(del);
+    row.appendChild(strong);
+    row.appendChild(meta);
+    row.appendChild(del);
+    item.appendChild(row);
     item.addEventListener('click', () => selectEntry('character', character.id));
     container.appendChild(item);
   });
@@ -1084,11 +1224,13 @@ function renderNotes() {
       item.dataset.entryId = note.id;
       makeDraggable(item, 'note', note.id);
 
+      // Use row wrapper for proper delete button positioning
+      const row = document.createElement('div');
+      row.className = 'row';
+
       const strong = document.createElement('strong');
       strong.textContent = note.title;
-      const meta = document.createElement('span');
-      meta.className = 'meta';
-      meta.textContent = category;
+      // Category meta removed - items are already grouped by category
       const del = document.createElement('button');
       del.className = 'ghost icon-bin';
       del.title = 'Delete note';
@@ -1111,9 +1253,9 @@ function renderNotes() {
           showToast(`Could not delete note: ${err.message}`, { type: 'error' });
         }
       });
-      item.appendChild(strong);
-      item.appendChild(meta);
-      item.appendChild(del);
+      row.appendChild(strong);
+      row.appendChild(del);
+      item.appendChild(row);
       item.addEventListener('click', () => selectEntry('note', note.id));
       group.appendChild(item);
     });
@@ -1131,7 +1273,7 @@ async function selectEntry(type, id, extra = {}) {
       if (!chapter) return;
       const parsed = parseChapterContent(chapter.content);
       setTitleInput(parsed.title);
-      setEditorContent(parsed.body);
+      setEditorContent(parsed.body, parsed.isHtml);
       state.currentEntry = {
         type,
         id,
@@ -1148,7 +1290,7 @@ async function selectEntry(type, id, extra = {}) {
       if (!scene) return;
       const parsed = parseSceneContent(scene.content);
       setTitleInput(parsed.title);
-      setEditorContent(parsed.body);
+      setEditorContent(parsed.body, parsed.isHtml);
       state.currentEntry = {
         type,
         id,
@@ -1163,7 +1305,7 @@ async function selectEntry(type, id, extra = {}) {
       if (!character) return;
       const parsed = parseCharacterContent(character.content);
       setTitleInput(parsed.title);
-      setEditorContent(parsed.body);
+      setEditorContent(parsed.body, parsed.isHtml);
       state.currentEntry = {
         type,
         id,
@@ -1177,7 +1319,7 @@ async function selectEntry(type, id, extra = {}) {
       if (!note) return;
       const parsed = parseNoteContent(note.content);
       setTitleInput(parsed.title);
-      setEditorContent(parsed.body);
+      setEditorContent(parsed.body, parsed.isHtml);
       state.currentEntry = {
         type,
         id,
@@ -1597,12 +1739,10 @@ async function createNote() {
   const title = await promptInput({ title: 'New note title', placeholder: 'Note title' });
   if (!title) return;
   try {
-    const categoryInput = await promptInput({
-      title: 'Note category',
-      placeholder: `Choose: ${NOTE_CATEGORIES.join(', ')}`,
-      defaultValue: NOTE_CATEGORIES[0]
-    });
-    const category = (categoryInput && categoryInput.trim()) || NOTE_CATEGORIES[0];
+    // Use the new category selection modal
+    const category = await showCategorySelect('General');
+    if (!category) return; // User cancelled
+
     const markdown = buildNoteMarkdown(title, category, '');
     const result = await window.novelist.notes.save(state.project.path, null, {
       title,

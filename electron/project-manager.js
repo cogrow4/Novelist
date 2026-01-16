@@ -779,8 +779,6 @@ export {
   checkGitInstalled,
   cloneProject,
   configureGitUser,
-  cloneProject,
-  configureGitUser,
   autoSync,
   getGitStatus,
   getProjectsGitStatus

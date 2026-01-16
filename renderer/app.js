@@ -2315,133 +2315,131 @@ function initSettings() {
     ui.settingIndent.addEventListener('change', (e) => savePreferences({ editorIndent: e.target.checked }));
   }
 
-  ui.settingIndent.addEventListener('change', (e) => savePreferences({ editorIndent: e.target.checked }));
-}
 
-// GitHub Token
-if (ui.settingGitToken) {
-  ui.settingGitToken.addEventListener('change', (e) => savePreferences({ gitToken: e.target.value.trim() }));
-}
-if (ui.btnToggleToken && ui.settingGitToken) {
-  ui.btnToggleToken.addEventListener('click', () => {
-    const type = ui.settingGitToken.type;
-    ui.settingGitToken.type = type === 'password' ? 'text' : 'password';
-    ui.btnToggleToken.textContent = type === 'password' ? 'Hide' : 'Show';
-  });
-}
 
-// Projects Git Table
-if (ui.btnRefreshGitProjects) {
-  ui.btnRefreshGitProjects.addEventListener('click', renderProjectGitTable);
-}
-
-// Show Remote URL
-if (state.project && state.preferences.gitConfigured) {
-  window.novelist.git.status(state.project.path).then(status => {
-    if (ui.settingRemoteUrl) ui.settingRemoteUrl.textContent = status.remoteUrl || 'None';
-  });
-}
-}
-
-async function renderProjectGitTable() {
-  const tbody = ui.projectsGitTable.querySelector('tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Loading projects...</td></tr>';
-
-  try {
-    const projects = await window.novelist.git.getAllStatus();
-    if (!projects || projects.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No projects found</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = '';
-    projects.forEach(p => {
-      const tr = document.createElement('tr');
-      // Name
-      const tdName = document.createElement('td');
-      tdName.textContent = p.name;
-
-      // Remote
-      const tdRemote = document.createElement('td');
-      if (p.remoteUrl) {
-        const a = document.createElement('a');
-        a.href = '#';
-        a.className = 'repo-link';
-        a.textContent = p.remoteUrl;
-        a.title = p.remoteUrl;
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          navigator.clipboard.writeText(p.remoteUrl);
-          showToast('Copied to clipboard');
-        });
-        tdRemote.appendChild(a);
-      } else {
-        tdRemote.textContent = '-';
-        tdRemote.style.color = 'var(--text-muted)';
-      }
-
-      // Status
-      const tdStatus = document.createElement('td');
-      tdStatus.textContent = p.isRepo ? (p.remoteUrl ? 'Linked' : 'Local Git') : 'Not linked';
-      tdStatus.style.color = p.isRepo ? (p.remoteUrl ? '#4cd964' : '#ffcc00') : 'var(--text-muted)';
-
-      tr.appendChild(tdName);
-      tr.appendChild(tdRemote);
-      tr.appendChild(tdStatus);
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error('Failed to load project status', err);
-    tbody.innerHTML = `<tr><td colspan="3" class="empty-state error">Error: ${err.message}</td></tr>`;
+  // GitHub Token
+  if (ui.settingGitToken) {
+    ui.settingGitToken.addEventListener('change', (e) => savePreferences({ gitToken: e.target.value.trim() }));
   }
-}
+  if (ui.btnToggleToken && ui.settingGitToken) {
+    ui.btnToggleToken.addEventListener('click', () => {
+      const type = ui.settingGitToken.type;
+      ui.settingGitToken.type = type === 'password' ? 'text' : 'password';
+      ui.btnToggleToken.textContent = type === 'password' ? 'Hide' : 'Show';
+    });
+  }
 
-if (ui.cloneConfirm) {
-  ui.cloneConfirm.addEventListener('click', async () => {
-    const url = ui.cloneUrl.value.trim();
-    if (!url) return;
-    ui.cloneConfirm.disabled = true;
-    ui.cloneConfirm.textContent = 'Cloning...';
+  // Projects Git Table
+  if (ui.btnRefreshGitProjects) {
+    ui.btnRefreshGitProjects.addEventListener('click', renderProjectGitTable);
+  }
+
+  if (state.project && state.preferences.gitConfigured) {
+    window.novelist.git.status(state.project.path).then(status => {
+      if (ui.settingRemoteUrl) ui.settingRemoteUrl.textContent = status.remoteUrl || 'None';
+    });
+  }
+
+
+  async function renderProjectGitTable() {
+    const tbody = ui.projectsGitTable.querySelector('tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Loading projects...</td></tr>';
+
     try {
-      const project = await window.novelist.projects.clone(url);
-      ui.gitCloneModal.classList.add('hidden');
-      if (project) {
-        openProjectByPath(project.path);
+      const projects = await window.novelist.git.getAllStatus();
+      if (!projects || projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No projects found</td></tr>';
+        return;
       }
-    } catch (e) {
-      alert(`Clone failed: ${e.message}`);
-    } finally {
-      ui.cloneConfirm.disabled = false;
-      ui.cloneConfirm.textContent = 'Clone';
+
+      tbody.innerHTML = '';
+      projects.forEach(p => {
+        const tr = document.createElement('tr');
+        // Name
+        const tdName = document.createElement('td');
+        tdName.textContent = p.name;
+
+        // Remote
+        const tdRemote = document.createElement('td');
+        if (p.remoteUrl) {
+          const a = document.createElement('a');
+          a.href = '#';
+          a.className = 'repo-link';
+          a.textContent = p.remoteUrl;
+          a.title = p.remoteUrl;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigator.clipboard.writeText(p.remoteUrl);
+            showToast('Copied to clipboard');
+          });
+          tdRemote.appendChild(a);
+        } else {
+          tdRemote.textContent = '-';
+          tdRemote.style.color = 'var(--text-muted)';
+        }
+
+        // Status
+        const tdStatus = document.createElement('td');
+        tdStatus.textContent = p.isRepo ? (p.remoteUrl ? 'Linked' : 'Local Git') : 'Not linked';
+        tdStatus.style.color = p.isRepo ? (p.remoteUrl ? '#4cd964' : '#ffcc00') : 'var(--text-muted)';
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdRemote);
+        tr.appendChild(tdStatus);
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error('Failed to load project status', err);
+      tbody.innerHTML = `<tr><td colspan="3" class="empty-state error">Error: ${err.message}</td></tr>`;
     }
-  });
-}
+  }
 
-if (ui.cloneCancel) {
-  ui.cloneCancel.addEventListener('click', () => ui.gitCloneModal.classList.add('hidden'));
-}
+  if (ui.cloneConfirm) {
+    ui.cloneConfirm.addEventListener('click', async () => {
+      const url = ui.cloneUrl.value.trim();
+      if (!url) return;
+      ui.cloneConfirm.disabled = true;
+      ui.cloneConfirm.textContent = 'Cloning...';
+      try {
+        const project = await window.novelist.projects.clone(url);
+        ui.gitCloneModal.classList.add('hidden');
+        if (project) {
+          openProjectByPath(project.path);
+        }
+      } catch (e) {
+        alert(`Clone failed: ${e.message}`);
+      } finally {
+        ui.cloneConfirm.disabled = false;
+        ui.cloneConfirm.textContent = 'Clone';
+      }
+    });
+  }
 
-if (ui.btnForceSync) {
-  ui.btnForceSync.addEventListener('click', async () => {
-    if (!state.project) return;
-    showToast('Syncing...');
-    try {
-      await window.novelist.git.autoSync(state.project.path);
-      showToast('Synced successfully');
-    } catch (e) {
-      showToast('Sync failed', { type: 'error' });
-    }
-  });
-}
+  if (ui.cloneCancel) {
+    ui.cloneCancel.addEventListener('click', () => ui.gitCloneModal.classList.add('hidden'));
+  }
 
-if (ui.btnReconfigureGit) {
-  ui.btnReconfigureGit.addEventListener('click', () => {
-    ui.settingsModal.classList.add('hidden');
-    ui.gitSetupModal.classList.remove('hidden');
-    showWizardStep(1);
-  });
-}
+  if (ui.btnForceSync) {
+    ui.btnForceSync.addEventListener('click', async () => {
+      if (!state.project) return;
+      showToast('Syncing...');
+      try {
+        await window.novelist.git.autoSync(state.project.path);
+        showToast('Synced successfully');
+      } catch (e) {
+        showToast('Sync failed', { type: 'error' });
+      }
+    });
+  }
+
+  if (ui.btnReconfigureGit) {
+    ui.btnReconfigureGit.addEventListener('click', () => {
+      ui.settingsModal.classList.add('hidden');
+      ui.gitSetupModal.classList.remove('hidden');
+      showWizardStep(1);
+    });
+  }
 }
 
 function openSettings() {
